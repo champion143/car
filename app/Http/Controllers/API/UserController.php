@@ -29,10 +29,6 @@ class UserController extends Controller
 
     public function register(Request $request)
     {
-        $x = new \stdClass();
-        return response()->json(['success'=>false,'data'=>$x,'message'=>'racername already exist'], 401);
-        die;
-
         $arr_rules['first_name']          = "required|string|max:255";
         $arr_rules['last_name']          = "required|string|max:255";
         $arr_rules['email']         = "required|string|max:255|email|";
