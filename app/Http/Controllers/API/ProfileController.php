@@ -19,13 +19,14 @@ class ProfileController extends Controller
 
     public function __construct(Request $request)
     {
+        $x = new \stdClass();
         $headers = getallheaders();
         if(isset($headers['token']))
         {
             $check = User::where('api_token',$headers['token'])->first();
             if(!isset($check->id))
             {
-                return response()->json(['success'=>false,'data'=>array(),'message'=>'token mis matched'], 401);
+                return response()->json(['success'=>false,'data'=>$x,'message'=>'token mis matched'], 401);
                 die();
             }else{
                 $this->userId = $check->id;
@@ -41,8 +42,16 @@ class ProfileController extends Controller
         $userDetail = User::where('api_token',$request->header('token'))->first();
         if(isset($userDetail->id))
         {
+            $follwerList = Follow::where('following_id',$this->userId)->with('followingUser')->get();
+            $followingList = Follow::where('follower_id',$this->userId)->with('followerUser')->get();
+            $userDetail->follwerList = $follwerList;
+            $userDetail->followingList = $followingList;
             $userDetail->follower_count = Follow::where('following_id',$userDetail->id)->count();
             $userDetail->following_count = Follow::where('follower_id',$userDetail->id)->count();
+            $userDetail->win_count = 0;
+            $userDetail->loss_count = 0;
+            $carList = Car::where('user_id',$this->userId)->get();
+            $userDetail->carList = $carList;
             return response()->json(['success'=>true,'data'=>$userDetail,'message'=>'user profile get successfully'], 200);
         }else{
             return response()->json(['success'=>false,'data'=>array(),'message'=>'user not found'], 401);
@@ -93,18 +102,19 @@ class ProfileController extends Controller
     // do follow and un follow
     public function followStatusChange(Request $request)
     {
+        $x = new \stdClass();
         $following_id = $request->input('following_id');
         $follower_id = $this->userId;
         if($following_id == $follower_id)
         {
             $message = 'User Can not follow own';
-            return response()->json(['success'=>true,'data'=>array(),'message'=>$message], 200);
+            return response()->json(['success'=>true,'data'=>$x,'message'=>$message], 200);
         }else{
             $UserCount = User::where('id',$following_id)->count();
             if($UserCount <= 0)
             {
                 $message = "Following User Not Found";
-                return response()->json(['success'=>true,'data'=>array(),'message'=>$message], 200);
+                return response()->json(['success'=>true,'data'=>$x,'message'=>$message], 200);
             }else{
                 $count = Follow::where('following_id',$following_id)->where('follower_id',$follower_id)->count();
                 if($count > 0)
@@ -118,7 +128,7 @@ class ProfileController extends Controller
                     $follow->save();
                     $message = 'User Follow Successsfully';
                 }
-                return response()->json(['success'=>true,'data'=>array(),'message'=>$message], 200);
+                return response()->json(['success'=>true,'data'=>$x,'message'=>$message], 200);
             }
         }
     }
@@ -133,9 +143,7 @@ class ProfileController extends Controller
     // followers list
     public function followingList()
     {
-        $follwerList = Follow::where('follower_id',$this->userId)->with('followerUser')->get();
-        return response()->json(['success'=>true,'data'=>$follwerList,'message'=>"Following List Get Successfully"], 200);
+        $followingList = Follow::where('follower_id',$this->userId)->with('followerUser')->get();
+        return response()->json(['success'=>true,'data'=>$followingList,'message'=>"Following List Get Successfully"], 200);
     }
-
-
 }
