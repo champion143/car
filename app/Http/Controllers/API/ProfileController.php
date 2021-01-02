@@ -92,7 +92,7 @@ class ProfileController extends Controller
         $Car->save();
         return response()->json(['success'=>true,'data'=>$Car,'message'=>'Item Registered successfully'], 200);
     }
-
+    //Car details
     public function getCarDetail(Request $request,$id)
     {
         $Car = Car::where('id',$id)->first();

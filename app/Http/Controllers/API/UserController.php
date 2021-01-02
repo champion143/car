@@ -35,7 +35,6 @@ class UserController extends Controller
         $arr_rules['email']         = "required|string|max:255|email|";
         $arr_rules['password']      = "required|string|min:6";
         $arr_rules['racername']      = "required|string|min:6";
-        // $arr_rules['confirm_password'] = "required|string|min:6|same:password";
         $validator = Validator::make($request->all(), $arr_rules);
         if ($validator->fails())
         {
