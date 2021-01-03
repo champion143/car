@@ -26,7 +26,6 @@ Route::middleware(['ApiUserCheck'])->group(function () {
     Route::get('user/followingList',[App\Http\Controllers\API\ProfileController::class, 'followingList']);
 });
 
-
 // Route::middleware('auth:api')->get('/user', function (Request $request) {
 //     return $request->user();
 // });

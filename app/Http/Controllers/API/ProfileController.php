@@ -39,6 +39,7 @@ class ProfileController extends Controller
     //
     public function index(Request $request)
     {
+        $x = new \stdClass();
         $userDetail = User::where('api_token',$request->header('token'))->first();
         if(isset($userDetail->id))
         {
@@ -54,7 +55,7 @@ class ProfileController extends Controller
             $userDetail->carList = $carList;
             return response()->json(['success'=>true,'data'=>$userDetail,'message'=>'user profile get successfully'], 200);
         }else{
-            return response()->json(['success'=>false,'data'=>array(),'message'=>'user not found'], 401);
+            return response()->json(['success'=>false,'data'=>$x,'message'=>'user not found'], 401);
         }
     }
 

@@ -29,6 +29,7 @@ class UserController extends Controller
 
     public function register(Request $request)
     {
+        $x = new \stdClass();
         $arr_rules['first_name']          = "required|string|max:255";
         $arr_rules['last_name']          = "required|string|max:255";
         $arr_rules['email']         = "required|string|max:255|email|";
