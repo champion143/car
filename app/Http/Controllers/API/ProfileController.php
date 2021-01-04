@@ -43,14 +43,18 @@ class ProfileController extends Controller
         $userDetail = User::where('api_token',$request->header('token'))->first();
         if(isset($userDetail->id))
         {
-            $follwerList = Follow::where('following_id',$this->userId)->with('followingUser')->get();
-            $followingList = Follow::where('follower_id',$this->userId)->with('followerUser')->get();
-            $userDetail->follwerList = $follwerList;
-            $userDetail->followingList = $followingList;
+            // $follwerList = Follow::where('following_id',$this->userId)->with('followingUser')->get();
+            // $followingList = Follow::where('follower_id',$this->userId)->with('followerUser')->get();
+            // $userDetail->follwerList = $follwerList;
+            // $userDetail->followingList = $followingList;
             $userDetail->follower_count = Follow::where('following_id',$userDetail->id)->count();
             $userDetail->following_count = Follow::where('follower_id',$userDetail->id)->count();
             $userDetail->win_count = 0;
             $userDetail->loss_count = 0;
+            if($userDetail->image != "")
+            {
+                $userDetail->image = url('images').'/'.$userDetail->image;
+            }
             $carList = Car::where('user_id',$this->userId)->get();
             $userDetail->carList = $carList;
             return response()->json(['success'=>true,'data'=>$userDetail,'message'=>'user profile get successfully'], 200);
@@ -67,6 +71,17 @@ class ProfileController extends Controller
         $userDetail['last_name'] = $request->input('last_name');
         $userDetail['racername'] = $request->input('racername');
         $userDetail['zipcode'] = $request->input('zipcode');
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $name = time().'.'.$image->getClientOriginalExtension();
+            $destinationPath = public_path('/images');
+            $image->move($destinationPath, $name);
+            $userDetail['image'] = $name;
+        }
+        if($request->has('address'))
+        {
+            $userDetail['address'] = $request->input('address');
+        }
         User::where('id',$this->userId)->update($userDetail);
         $userData = User::where('id',$this->userId)->first();
         return response()->json(['success'=>true,'data'=>$userData,'message'=>'User Profile Updated successfully'], 200);
@@ -76,6 +91,13 @@ class ProfileController extends Controller
     public function carList(Request $request)
     {
         $carList = Car::where('user_id',$this->userId)->get();
+        foreach($carList as $car)
+        {
+            if($car->image != "")
+            {
+                $car->image = url('images').'/'.$car->image;
+            }
+        }
         return response()->json(['success'=>true,'data'=>$carList,'message'=>'Car List Retrieve successfully'], 200);
     }
 
@@ -89,6 +111,13 @@ class ProfileController extends Controller
         $Car->engine = $request->input('engine');
         $Car->power = $request->input('power');
         $Car->mods = $request->input('mods');
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $name = time().'.'.$image->getClientOriginalExtension();
+            $destinationPath = public_path('/images');
+            $image->move($destinationPath, $name);
+            $Car->image = $name;
+        }
         $Car->user_id = $this->userId;
         $Car->save();
         return response()->json(['success'=>true,'data'=>$Car,'message'=>'Item Registered successfully'], 200);
@@ -99,6 +128,28 @@ class ProfileController extends Controller
         $Car = Car::where('id',$id)->first();
         return response()->json(['success'=>true,'data'=>$Car,'message'=>'Item Registered successfully'], 200);
     }
+    // update car
+    public function updateCar(Request $request)
+    {
+        $userDetail = array();
+        $userDetail['name'] = $request->input('name');
+        $userDetail['year'] = $request->input('year');
+        $userDetail['trim'] = $request->input('trim');
+        $userDetail['engine'] = $request->input('engine');
+        $userDetail['power'] = $request->input('power');
+        $userDetail['mods'] = $request->input('mods');
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $name = time().'.'.$image->getClientOriginalExtension();
+            $destinationPath = public_path('/images');
+            $image->move($destinationPath, $name);
+            $userDetail['image'] = $name;
+        }
+        Car::where('id',$request->input('id'))->update($userDetail);
+        $Car = Car::where('id',$request->input('id'))->first();
+        return response()->json(['success'=>true,'data'=>$Car,'message'=>'Item Updated successfully'], 200);
+    }
+
 
     // do follow and un follow
     public function followStatusChange(Request $request)

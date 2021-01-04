@@ -9,6 +9,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use App\Car;
+use App\Follow;
+use Illuminate\Support\Facades\Password;
 
 class UserController extends Controller
 {
@@ -20,6 +23,14 @@ class UserController extends Controller
             $user->device_token = $request->input('device_token', '');
             $user->api_token = Str::random(60);
             $user->save();
+
+            $user->follower_count = Follow::where('following_id',$user->id)->count();
+            $user->following_count = Follow::where('follower_id',$user->id)->count();
+            $user->win_count = 0;
+            $user->loss_count = 0;
+            $carList = Car::where('user_id',$user->id)->get();
+            $user->carList = $carList;
+
             return response()->json(['success' => true,'data'=>$user,'message'=>'Login Successfully'], 200);
         }
         else{
@@ -56,6 +67,10 @@ class UserController extends Controller
                     $user->email = $request->input('email');
                     $user->password = Hash::make($request->input('password'));
                     $user->api_token = Str::random(60);
+                    if($request->has('address'))
+                    {
+                        $user->address = $request->input('address');
+                    }
                     $user->racername = $request->input('racername');
                     $user->zipcode = $request->input('zipcode');
                     $user->image = "";
@@ -65,6 +80,13 @@ class UserController extends Controller
                 }
             }
         }
+    }
+
+    public function forgot_password(Request $request)
+    {
+        $credentials = request()->validate(['email' => 'required|email']);
+        Password::sendResetLink($credentials);
+        return response()->json(["msg" => 'Reset password link sent on your email id.']);
     }
 
 }
