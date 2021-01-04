@@ -70,6 +70,8 @@ class UserController extends Controller
                     if($request->has('address'))
                     {
                         $user->address = $request->input('address');
+                    }else{
+                        $user->address = "";
                     }
                     $user->racername = $request->input('racername');
                     $user->zipcode = $request->input('zipcode');

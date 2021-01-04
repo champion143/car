@@ -81,6 +81,8 @@ class ProfileController extends Controller
         if($request->has('address'))
         {
             $userDetail['address'] = $request->input('address');
+        }else{
+            $user->address = "";
         }
         User::where('id',$this->userId)->update($userDetail);
         $userData = User::where('id',$this->userId)->first();
