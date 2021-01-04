@@ -82,7 +82,7 @@ class ProfileController extends Controller
         {
             $userDetail['address'] = $request->input('address');
         }else{
-            $user->address = "";
+            $userDetail['address'] = "";
         }
         User::where('id',$this->userId)->update($userDetail);
         $userData = User::where('id',$this->userId)->first();
