@@ -86,6 +86,10 @@ class ProfileController extends Controller
         }
         User::where('id',$this->userId)->update($userDetail);
         $userData = User::where('id',$this->userId)->first();
+        if($userData->image != "")
+        {
+            $userData->image = url('images').'/'.$userData->image;
+        }
         return response()->json(['success'=>true,'data'=>$userData,'message'=>'User Profile Updated successfully'], 200);
     }
 
@@ -122,6 +126,12 @@ class ProfileController extends Controller
         }
         $Car->user_id = $this->userId;
         $Car->save();
+
+        if($Car->image != "")
+        {
+            $Car->image = url('images').'/'.$Car->image;
+        }
+
         return response()->json(['success'=>true,'data'=>$Car,'message'=>'Item Registered successfully'], 200);
     }
     //Car details
@@ -149,6 +159,12 @@ class ProfileController extends Controller
         }
         Car::where('id',$request->input('id'))->update($userDetail);
         $Car = Car::where('id',$request->input('id'))->first();
+
+        if($Car->image != "")
+        {
+            $Car->image = url('images').'/'.$Car->image;
+        }
+
         return response()->json(['success'=>true,'data'=>$Car,'message'=>'Item Updated successfully'], 200);
     }
 
