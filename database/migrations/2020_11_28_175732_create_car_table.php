@@ -22,6 +22,7 @@ class CreateCarTable extends Migration
             $table->text('engine')->nullable();
             $table->text('power')->nullable();
             $table->text('mods')->nullable();
+            $table->text('make')->nullable();
             $table->integer('user_id')->default(0);
             $table->timestamps();
         });

@@ -56,6 +56,13 @@ class ProfileController extends Controller
                 $userDetail->image = url('images').'/'.$userDetail->image;
             }
             $carList = Car::where('user_id',$this->userId)->get();
+            foreach($carList as $car)
+            {
+                if($car->image != "")
+                {
+                    $car->image = url('images').'/'.$car->image;
+                }
+            }
             $userDetail->carList = $carList;
             return response()->json(['success'=>true,'data'=>$userDetail,'message'=>'user profile get successfully'], 200);
         }else{
