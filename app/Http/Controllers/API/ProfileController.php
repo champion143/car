@@ -117,6 +117,7 @@ class ProfileController extends Controller
         $Car->engine = $request->input('engine');
         $Car->power = $request->input('power');
         $Car->mods = $request->input('mods');
+        $Car->make = $request->input('make');
         if ($request->hasFile('image')) {
             $image = $request->file('image');
             $name = time().'.'.$image->getClientOriginalExtension();
@@ -150,6 +151,7 @@ class ProfileController extends Controller
         $userDetail['engine'] = $request->input('engine');
         $userDetail['power'] = $request->input('power');
         $userDetail['mods'] = $request->input('mods');
+        $userDetail['make'] = $request->input('make');
         if ($request->hasFile('image')) {
             $image = $request->file('image');
             $name = time().'.'.$image->getClientOriginalExtension();
