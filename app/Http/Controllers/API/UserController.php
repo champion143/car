@@ -23,14 +23,23 @@ class UserController extends Controller
             $user->device_token = $request->input('device_token', '');
             $user->api_token = Str::random(60);
             $user->save();
-
+            if($user->image != "")
+            {
+                $user->image = url('images').'/'.$user->image;
+            }
             $user->follower_count = Follow::where('following_id',$user->id)->count();
             $user->following_count = Follow::where('follower_id',$user->id)->count();
             $user->win_count = 0;
             $user->loss_count = 0;
             $carList = Car::where('user_id',$user->id)->get();
+            foreach($carList as $car)
+            {
+                if($car->image != "")
+                {
+                    $car->image = url('images').'/'.$car->image;
+                }
+            }
             $user->carList = $carList;
-
             return response()->json(['success' => true,'data'=>$user,'message'=>'Login Successfully'], 200);
         }
         else{

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Car;
 use App\Follow;
 use App\Http\Controllers\Controller;
+use App\Notification;
 use App\User;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
@@ -148,6 +149,12 @@ class ProfileController extends Controller
         $Car = Car::where('id',$id)->first();
         return response()->json(['success'=>true,'data'=>$Car,'message'=>'Item Registered successfully'], 200);
     }
+    // delete car
+    public function deleteCar(Request $request,$id)
+    {
+        $Car = Car::where('id',$id)->delete();
+        return response()->json(['success'=>true,'data'=>$Car,'message'=>'Item Deleted successfully'], 200);
+    }
     // update car
     public function updateCar(Request $request)
     {
@@ -216,6 +223,17 @@ class ProfileController extends Controller
     public function followerList()
     {
         $follwerList = Follow::where('following_id',$this->userId)->with('followingUser')->get();
+        $follwerList = $follwerList->toArray();
+        foreach($follwerList as $key=>$follwer)
+        {
+            $user = $follwer['following_user'];
+            if($user['image'] != "")
+            {
+                $user['image'] = url('images').'/'.$user['image'];
+            }
+            $follwerList[$key]['user'] = $user;
+            unset($follwerList[$key]['following_user']);
+        }
         return response()->json(['success'=>true,'data'=>$follwerList,'message'=>"Follower List Get Successfully"], 200);
     }
 
@@ -223,6 +241,48 @@ class ProfileController extends Controller
     public function followingList()
     {
         $followingList = Follow::where('follower_id',$this->userId)->with('followerUser')->get();
+        $followingList = $followingList->toArray();
+        foreach($followingList as $key=>$follwer)
+        {
+            $user = $follwer['follower_user'];
+            if($user['image'] != "")
+            {
+                $user['image'] = url('images').'/'.$user['image'];
+            }
+            $followingList[$key]['user'] = $user;
+            unset($followingList[$key]['follower_user']);
+        }
         return response()->json(['success'=>true,'data'=>$followingList,'message'=>"Following List Get Successfully"], 200);
+    }
+
+    // notificaion
+    public function raceChallenger(Request $request)
+    {
+        $receiver_id = $request->input('receiver_id');
+        $Notification = new Notification;
+        $Notification->sender_id = $this->userId;
+        $Notification->receiver_id = $receiver_id;
+        $Notification->type = "challenge";
+        $Notification->save();
+        return response()->json(['success'=>true,'data'=>$Notification,'message'=>'user challenge successfully'], 200);
+    }
+
+    // accept and reject
+    public function changeNotificationStatus(Request $request)
+    {
+        $Notification_id = $request->input('Notification_id');
+        $status = $request->input('status');
+        $Notification = Notification::where('Notification_id',$Notification_id)->update(
+            array(
+                'status' => $status
+            )
+        );
+        return response()->json(['success'=>true,'data'=>$Notification,'message'=>'user challenge successfully'], 200);
+    }
+
+    // notification list
+    public function notificaionList()
+    {
+
     }
 }
