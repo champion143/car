@@ -33,6 +33,8 @@ Route::middleware(['ApiUserCheck'])->group(function () {
     Route::post('user/changeNotificationStatus',[App\Http\Controllers\API\ProfileController::class, 'changeNotificationStatus']);
     Route::post('user/raceChallenger',[App\Http\Controllers\API\ProfileController::class, 'raceChallenger']);
 
+    Route::get('user/getCarMake',[App\Http\Controllers\API\ProfileController::class, 'getCarMake']);
+
 });
 Route::post('user/searchUserUsingRacerName',[App\Http\Controllers\API\CommonUserController::class, 'searchUserUsingRacerName']);
 Route::post('user/searchUserUsingUserName',[App\Http\Controllers\API\CommonUserController::class, 'searchUserUsingUserName']);

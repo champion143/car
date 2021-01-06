@@ -310,4 +310,37 @@ class ProfileController extends Controller
         }
         return response()->json(['success'=>true,'data'=>$Notification,'message'=>'Notification list successfully'], 200);
     }
+
+    //
+    public function getCarMake()
+    {
+        $makeArr = array();
+        $object = new \stdClass();
+        $object->acura = array(
+            'RDX','TLX'
+        );
+        array_push($makeArr,$object);
+        $object = new \stdClass();
+        $object->toyoto = array(
+            '4RUNNER','Avalon'
+        );
+        array_push($makeArr,$object);
+        $object = new \stdClass();
+        $object->Audi = array(
+            'A7','Q5'
+        );
+        array_push($makeArr,$object);
+        $object = new \stdClass();
+        $object->BMW = array(
+            'X3','X7'
+        );
+        array_push($makeArr,$object);
+        $object = new \stdClass();
+        $object->Buick = array(
+            'Encore','Encore GX'
+        );
+        array_push($makeArr,$object);
+
+        return response()->json(['success'=>true,'data'=>$makeArr,'message'=>'Notification list successfully'], 200);
+    }
 }

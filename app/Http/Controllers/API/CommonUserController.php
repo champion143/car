@@ -86,4 +86,5 @@ class CommonUserController extends Controller
                 'message'=>'User List Get successfully'
             ], 200);
     }
+
 }
