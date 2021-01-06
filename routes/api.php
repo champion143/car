@@ -28,6 +28,7 @@ Route::middleware(['ApiUserCheck'])->group(function () {
     Route::post('user/followandunfollow',[App\Http\Controllers\API\ProfileController::class, 'followStatusChange']);
     Route::get('user/followerList',[App\Http\Controllers\API\ProfileController::class, 'followerList']);
     Route::get('user/followingList',[App\Http\Controllers\API\ProfileController::class, 'followingList']);
+
 });
 Route::post('user/searchUserUsingRacerName',[App\Http\Controllers\API\CommonUserController::class, 'searchUserUsingRacerName']);
 Route::post('user/searchUserUsingUserName',[App\Http\Controllers\API\CommonUserController::class, 'searchUserUsingUserName']);
