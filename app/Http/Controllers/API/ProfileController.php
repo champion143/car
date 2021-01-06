@@ -231,6 +231,15 @@ class ProfileController extends Controller
             {
                 $user['image'] = url('images').'/'.$user['image'];
             }
+            $is_follow = 0;
+            $following_id = $follwer['id'];
+            $follower_id = $this->userId;
+            $follow = Follow::where('following_id',$following_id)->where('follower_id',$follower_id)->first();
+            if(isset($follow->id))
+            {
+                $is_follow = 1;
+            }
+            $user['is_follow'] = $is_follow;
             $follwerList[$key]['user'] = $user;
             unset($follwerList[$key]['following_user']);
         }
@@ -249,7 +258,11 @@ class ProfileController extends Controller
             {
                 $user['image'] = url('images').'/'.$user['image'];
             }
+
+            $user['is_follow'] = 1;
+
             $followingList[$key]['user'] = $user;
+
             unset($followingList[$key]['follower_user']);
         }
         return response()->json(['success'=>true,'data'=>$followingList,'message'=>"Following List Get Successfully"], 200);
