@@ -258,11 +258,8 @@ class ProfileController extends Controller
             {
                 $user['image'] = url('images').'/'.$user['image'];
             }
-
             $user['is_follow'] = 1;
-
             $followingList[$key]['user'] = $user;
-
             unset($followingList[$key]['follower_user']);
         }
         return response()->json(['success'=>true,'data'=>$followingList,'message'=>"Following List Get Successfully"], 200);
