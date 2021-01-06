@@ -18,7 +18,7 @@ class CreateTableNotificaion extends Migration
             $table->integer('sender_id')->default(0);
             $table->integer('receiver_id')->default(0);
             $table->integer('status')->default(0);
-            $table->integer('type')->nullable();
+            $table->text('type')->nullable();
             $table->timestamps();
         });
     }

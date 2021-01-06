@@ -272,17 +272,32 @@ class ProfileController extends Controller
     {
         $Notification_id = $request->input('Notification_id');
         $status = $request->input('status');
-        $Notification = Notification::where('Notification_id',$Notification_id)->update(
+        $message = "";
+        if($status == 1)
+        {
+            $message = "Challenge Accespted Successfully";
+        }else if($status == 2){
+            $message = "Challenge Rejected Successfully";
+        }
+        $Notification = Notification::where('id',$Notification_id)->update(
             array(
                 'status' => $status
             )
         );
-        return response()->json(['success'=>true,'data'=>$Notification,'message'=>'user challenge successfully'], 200);
+        return response()->json(['success'=>true,'data'=>$Notification,'message'=>$message], 200);
     }
 
     // notification list
     public function notificaionList()
     {
-
+        $Notification = Notification::with('user')->where('receiver_id',$this->userId)->get();
+        foreach($Notification as $not)
+        {
+            if($not->user->image)
+            {
+                $not->user->image = url('images').'/'.$not->user->image;
+            }
+        }
+        return response()->json(['success'=>true,'data'=>$Notification,'message'=>'Notification list successfully'], 200);
     }
 }
