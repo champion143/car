@@ -62,7 +62,7 @@ class CommonUserController extends Controller
     public function searchUserUsingUserName(Request $request)
     {
         $username = $request->input('username');
-        $users = User::where('first_name','like','%'.$username.'%')->orWhere('last_name','like','%'.$username.'%')->where('id','!=',$this->userId)->get();
+        $users = User::where('first_name','like','%'.$username.'%')->where('id','!=',$this->userId)->get();
         foreach($users as $user)
         {
             $is_follow = 0;
@@ -86,5 +86,4 @@ class CommonUserController extends Controller
                 'message'=>'User List Get successfully'
             ], 200);
     }
-
 }

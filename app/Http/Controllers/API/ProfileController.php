@@ -188,9 +188,30 @@ class ProfileController extends Controller
     // do follow and un follow
     public function followStatusChange(Request $request)
     {
-        $x = new \stdClass();
         $following_id = $request->input('following_id');
         $follower_id = $this->userId;
+        $x = Follow::where('follower_id',$follower_id)->with('followingUser')->get();
+        $x = $x->toArray();
+        foreach($x as $key=>$follwer)
+        {
+            $user = $follwer['following_user'];
+            if($user['image'] != "")
+            {
+                $user['image'] = url('images').'/'.$user['image'];
+            }
+            $is_follow = 0;
+            $following_id = $follwer['id'];
+            $follower_id = $this->userId;
+            $follow = Follow::where('following_id',$following_id)->where('follower_id',$follower_id)->first();
+            if(isset($follow->id))
+            {
+                $is_follow = 1;
+            }
+            $user['is_follow'] = $is_follow;
+            $x[$key]['user'] = $user;
+            unset($x[$key]['following_user']);
+        }
+        $x = $x[0];
         if($following_id == $follower_id)
         {
             $message = 'User Can not follow own';
@@ -232,7 +253,7 @@ class ProfileController extends Controller
                 $user['image'] = url('images').'/'.$user['image'];
             }
             $is_follow = 0;
-            $following_id = $follwer['id'];
+            $following_id = $user['id'];
             $follower_id = $this->userId;
             $follow = Follow::where('following_id',$following_id)->where('follower_id',$follower_id)->first();
             if(isset($follow->id))
@@ -240,6 +261,7 @@ class ProfileController extends Controller
                 $is_follow = 1;
             }
             $user['is_follow'] = $is_follow;
+
             $follwerList[$key]['user'] = $user;
             unset($follwerList[$key]['following_user']);
         }
@@ -274,6 +296,38 @@ class ProfileController extends Controller
         $Notification->receiver_id = $receiver_id;
         $Notification->type = "challenge";
         $Notification->save();
+
+        /* start push notificaion */
+        $receiver_data = User::where('id',$receiver_id)->first();
+        $sender_data = User::where('id',$this->userId)->first();
+        $device_token = $receiver_data->device_token;
+        $sender_name = $sender_data->first_name;
+        $receiver_name = $receiver_data->first_name;
+        $url = 'https://fcm.googleapis.com/fcm/send';
+        $fields = array (
+            'registration_ids' => array (
+                    $device_token
+            ),
+            'data' => array (
+                    "message" => $sender_name." Challenged You For The Race";
+            )
+        );
+        $fields = json_encode ( $fields );
+        $headers = array (
+                'Authorization: key=' . "AAAAFCC7KjQ:APA91bHm9NC4ONC_fzdn_A0fwbqPArQPb9dzbs8jn2_BNT_fZyLi1wMzH9U3FW5uayZwgq7jMuwDol8H0NxJ5gXrSXEbyxamgtuO8XO4EgCA6dCiOZbUiTFhlgXV9wDsclGATC5tucZ5",
+                'Content-Type: application/json'
+        );
+        $ch = curl_init ();
+        curl_setopt ( $ch, CURLOPT_URL, $url );
+        curl_setopt ( $ch, CURLOPT_POST, true );
+        curl_setopt ( $ch, CURLOPT_HTTPHEADER, $headers );
+        curl_setopt ( $ch, CURLOPT_RETURNTRANSFER, true );
+        curl_setopt ( $ch, CURLOPT_POSTFIELDS, $fields );
+        $result = curl_exec ( $ch );
+        echo $result;
+        curl_close ( $ch );
+        /* end */
+
         return response()->json(['success'=>true,'data'=>$Notification,'message'=>'user challenge successfully'], 200);
     }
 
@@ -342,5 +396,21 @@ class ProfileController extends Controller
         array_push($makeArr,$object);
 
         return response()->json(['success'=>true,'data'=>$makeArr,'message'=>'Notification list successfully'], 200);
+    }
+
+    public function updateDeviceToken(Request $request)
+    {
+        $device_token = $request->input('device_token');
+        $user = User::where('id',$this->userId)->update(
+            array(
+                'device_token' => $device_token
+            )
+        );
+        return response()->json(
+            [
+                'success'=>true,
+                'data'=>array(),
+                'message'=>'Device Token successfully'
+            ], 200);
     }
 }

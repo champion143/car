@@ -16,7 +16,6 @@ Route::post('login', [App\Http\Controllers\API\UserController::class, 'login']);
 Route::post('register', [App\Http\Controllers\API\UserController::class, 'register']);
 Route::post('forgot-password', [App\Http\Controllers\API\UserController::class, 'forgot_password']);
 
-
 Route::middleware(['ApiUserCheck'])->group(function () {
     Route::post('profile',[App\Http\Controllers\API\ProfileController::class, 'index']);
     Route::post('profile/update',[App\Http\Controllers\API\ProfileController::class, 'update']);
@@ -35,6 +34,8 @@ Route::middleware(['ApiUserCheck'])->group(function () {
 
     Route::get('user/getCarMake',[App\Http\Controllers\API\ProfileController::class, 'getCarMake']);
 
+    /* update toke */
+    Route::post('user/updatedeviceToken',[App\Http\Controllers\API\ProfileController::class, 'updateDeviceToken']);
 });
 Route::post('user/searchUserUsingRacerName',[App\Http\Controllers\API\CommonUserController::class, 'searchUserUsingRacerName']);
 Route::post('user/searchUserUsingUserName',[App\Http\Controllers\API\CommonUserController::class, 'searchUserUsingUserName']);
