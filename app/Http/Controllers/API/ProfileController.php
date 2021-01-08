@@ -7,6 +7,7 @@ use App\Follow;
 use App\Http\Controllers\Controller;
 use App\Notification;
 use App\User;
+use App\MatchRace;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -411,6 +412,37 @@ class ProfileController extends Controller
                 'success'=>true,
                 'data'=>array(),
                 'message'=>'Device Token successfully'
+            ], 200);
+    }
+
+    // audio file store
+    public function audioFileUpload(Request $request)
+    {
+        $challenge_id = $request->input('challenge_id');
+        $speed = $request->input('speed');
+        $distance = $request->input('distance');
+        $racetype = $request->input('racetype');
+        $speed_at_green = $request->input('speed_at_green');
+        $MatchRace = new MatchRace();
+        $MatchRace->user_id = $this->userId;
+        $MatchRace->challenge_id = $challenge_id;
+        $MatchRace->speed = json_encode($speed);
+        $MatchRace->distance = $distance;
+        $MatchRace->racetype = $racetype;
+        $MatchRace->speed_at_green = $speed_at_green;
+        if ($request->hasFile('file')) {
+            $image = $request->file('file');
+            $name = time().'.'.$image->getClientOriginalExtension();
+            $destinationPath = public_path('/images');
+            $image->move($destinationPath, $name);
+            $MatchRace->file = $name;
+        }
+        $MatchRace->save();
+        return response()->json(
+            [
+                'success'=>true,
+                'data'=>$MatchRace,
+                'message'=>'Match Data successfully'
             ], 200);
     }
 }
