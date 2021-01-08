@@ -309,7 +309,7 @@ class ProfileController extends Controller
                     $device_token
             ),
             'data' => array (
-                    "message" => $sender_name." Challenged You For The Race";
+                    "message" => $sender_name." Challenged You For The Race"
             )
         );
         $fields = json_encode ( $fields );
