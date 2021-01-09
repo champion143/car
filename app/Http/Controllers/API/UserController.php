@@ -12,6 +12,7 @@ use Illuminate\Support\Str;
 use App\Car;
 use App\Follow;
 use Illuminate\Support\Facades\Password;
+use stdClass;
 
 class UserController extends Controller
 {
@@ -99,6 +100,43 @@ class UserController extends Controller
         $credentials = request()->validate(['email' => 'required|email']);
         Password::sendResetLink($credentials);
         return response()->json(["msg" => 'Reset password link sent on your email id.']);
+    }
+
+    public function test()
+    {
+        $key = 'AAAAFCC7KjQ:APA91bHm9NC4ONC_fzdn_A0fwbqPArQPb9dzbs8jn2_BNT_fZyLi1wMzH9U3FW5uayZwgq7jMuwDol8H0NxJ5gXrSXEbyxamgtuO8XO4EgCA6dCiOZbUiTFhlgXV9wDsclGATC5tucZ5';
+        /* start push notificaion */
+        $ch = curl_init("https://fcm.googleapis.com/fcm/send");
+        //The device token.
+        $token = "dVFYB80LR0bYpP77lPQioc:APA91bGXszjeBztoY6lN0QC6ZZeVGn_nUuxT-IHj1hish6wa8lQuHBgreTz9IU_9U_mRjCyAEvv1Wr0jl4zHPfgl4RIt-HXN0mMklrQ67B5bUb5squGRtov_mnzN0k7Jx1QTa6dvVZAf"; //token here
+        //Title of the Notification.
+        $title = "Carbon One To One";
+        //Body of the Notification.
+        $body = "Bear island knows no king but the king in the north, whose name is stark.";
+        $x = new stdClass();
+        $x->Nick = "Mario";
+        $x->Room = "PortugalVSDenmark";
+        //Creating the notification array.
+        $notification = array('title' =>$title , 'text' => $body, 'body' => 'Hello Body','extra_data'=>$x,"content_available" => true);
+
+        //This array contains, the token and the notification. The 'to' attribute stores the token.
+        $arrayToSend = array('to' => $token, 'notification' => $notification,'data'=>$x,'priority'=>'high');
+        //Generating JSON encoded string form the above array.
+        $json = json_encode($arrayToSend);
+        //Setup headers:
+        $headers = array();
+        $headers[] = 'Content-Type: application/json';
+        $headers[] = 'Authorization: key= AAAAFCC7KjQ:APA91bHm9NC4ONC_fzdn_A0fwbqPArQPb9dzbs8jn2_BNT_fZyLi1wMzH9U3FW5uayZwgq7jMuwDol8H0NxJ5gXrSXEbyxamgtuO8XO4EgCA6dCiOZbUiTFhlgXV9wDsclGATC5tucZ5'; // key here
+        //Setup curl, add headers and post parameters.
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $json);
+        curl_setopt($ch, CURLOPT_HTTPHEADER,$headers);
+        //Send the request
+        $response = curl_exec($ch);
+        //Close request
+        curl_close($ch);
+        print_r($response);
+
     }
 
 }

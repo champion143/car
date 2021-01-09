@@ -295,28 +295,35 @@ class ProfileController extends Controller
         $device_token = $receiver_data->device_token;
         $sender_name = $sender_data->first_name;
         $receiver_name = $receiver_data->first_name;
-        $url = 'https://fcm.googleapis.com/fcm/send';
-        $fields = array (
-            'registration_ids' => array (
-                    $device_token
-            ),
-            'data' => array (
-                    "message" => $sender_name." Challenged You For The Race"
-            )
-        );
-        $fields = json_encode ( $fields );
-        $headers = array (
-                'Authorization: key=' . "AAAAFCC7KjQ:APA91bHm9NC4ONC_fzdn_A0fwbqPArQPb9dzbs8jn2_BNT_fZyLi1wMzH9U3FW5uayZwgq7jMuwDol8H0NxJ5gXrSXEbyxamgtuO8XO4EgCA6dCiOZbUiTFhlgXV9wDsclGATC5tucZ5",
-                'Content-Type: application/json'
-        );
-        $ch = curl_init ();
-        curl_setopt ( $ch, CURLOPT_URL, $url );
-        curl_setopt ( $ch, CURLOPT_POST, true );
-        curl_setopt ( $ch, CURLOPT_HTTPHEADER, $headers );
-        curl_setopt ( $ch, CURLOPT_RETURNTRANSFER, true );
-        curl_setopt ( $ch, CURLOPT_POSTFIELDS, $fields );
-        $result = curl_exec ( $ch );
-        curl_close ( $ch );
+        $key = 'AAAAFCC7KjQ:APA91bHm9NC4ONC_fzdn_A0fwbqPArQPb9dzbs8jn2_BNT_fZyLi1wMzH9U3FW5uayZwgq7jMuwDol8H0NxJ5gXrSXEbyxamgtuO8XO4EgCA6dCiOZbUiTFhlgXV9wDsclGATC5tucZ5';
+        /* start push notificaion */
+        $ch = curl_init("https://fcm.googleapis.com/fcm/send");
+        //Title of the Notification.
+        $title = $sender_name." challenged you for the race";
+        //Body of the Notification.
+        $body = "Bear island knows no king but the king in the north, whose name is stark.";
+        $x = new stdClass();
+        $x->Nick = "Mario";
+        $x->Room = "PortugalVSDenmark";
+        //Creating the notification array.
+        $notification = array('title' =>$title , 'text' => $body, 'body' => 'Hello Body','extra_data'=>$x,"content_available" => true);
+
+        //This array contains, the token and the notification. The 'to' attribute stores the token.
+        $arrayToSend = array('to' => $device_token, 'notification' => $notification,'data'=>$x,'priority'=>'high');
+        //Generating JSON encoded string form the above array.
+        $json = json_encode($arrayToSend);
+        //Setup headers:
+        $headers = array();
+        $headers[] = 'Content-Type: application/json';
+        $headers[] = 'Authorization: key= AAAAFCC7KjQ:APA91bHm9NC4ONC_fzdn_A0fwbqPArQPb9dzbs8jn2_BNT_fZyLi1wMzH9U3FW5uayZwgq7jMuwDol8H0NxJ5gXrSXEbyxamgtuO8XO4EgCA6dCiOZbUiTFhlgXV9wDsclGATC5tucZ5'; // key here
+        //Setup curl, add headers and post parameters.
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $json);
+        curl_setopt($ch, CURLOPT_HTTPHEADER,$headers);
+        //Send the request
+        $response = curl_exec($ch);
+        //Close request
+        curl_close($ch);
         /* end */
 
         return response()->json(['success'=>true,'data'=>$Notification,'message'=>'user challenge successfully'], 200);

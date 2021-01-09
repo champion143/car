@@ -16,6 +16,9 @@ Route::post('login', [App\Http\Controllers\API\UserController::class, 'login']);
 Route::post('register', [App\Http\Controllers\API\UserController::class, 'register']);
 Route::post('forgot-password', [App\Http\Controllers\API\UserController::class, 'forgot_password']);
 
+
+Route::post('test', [App\Http\Controllers\API\UserController::class, 'test']);
+
 Route::middleware(['ApiUserCheck'])->group(function () {
     Route::post('profile',[App\Http\Controllers\API\ProfileController::class, 'index']);
     Route::post('profile/update',[App\Http\Controllers\API\ProfileController::class, 'update']);
