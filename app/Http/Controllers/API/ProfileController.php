@@ -316,7 +316,6 @@ class ProfileController extends Controller
         curl_setopt ( $ch, CURLOPT_RETURNTRANSFER, true );
         curl_setopt ( $ch, CURLOPT_POSTFIELDS, $fields );
         $result = curl_exec ( $ch );
-        echo $result;
         curl_close ( $ch );
         /* end */
 
