@@ -303,8 +303,8 @@ class ProfileController extends Controller
         //Body of the Notification.
         $body = "Bear island knows no king but the king in the north, whose name is stark.";
         $x = new stdClass();
-        $x->Nick = "Mario";
-        $x->Room = "PortugalVSDenmark";
+        $x->username = $sender_name;
+        $x->challenged_id = $Notification->id;
         //Creating the notification array.
         $notification = array('title' =>$title , 'text' => $body, 'body' => 'Hello Body','extra_data'=>$x,"content_available" => true);
 
