@@ -65,8 +65,8 @@ class UserController extends Controller
             {
                 return response()->json(['success'=>false,'data'=>$x,'message'=>'racername already exist'], 401);
             }else{
-                $check = User::where('email',$request->input('email'))->first();
-                if(isset($check->id))
+                $checked = User::where('email',$request->input('email'))->first();
+                if(isset($checked->id))
                 {
                     return response()->json(['success'=>false,'data'=>$x,'message'=>'user email already exist'], 401);
                 }else{
@@ -82,6 +82,7 @@ class UserController extends Controller
                     }else{
                         $user->address = "";
                     }
+                    $user->device_token = $request->input('device_token','');
                     $user->racername = $request->input('racername');
                     $user->zipcode = $request->input('zipcode');
                     $user->image = "";

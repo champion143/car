@@ -191,28 +191,19 @@ class ProfileController extends Controller
     {
         $following_id = $request->input('following_id');
         $follower_id = $this->userId;
-        $x = Follow::where('follower_id',$follower_id)->with('followingUser')->get();
-        $x = $x->toArray();
-        foreach($x as $key=>$follwer)
+        $x = User::where('id',$follower_id)->first();
+        if($x->image != "")
         {
-            $user = $follwer['following_user'];
-            if($user['image'] != "")
-            {
-                $user['image'] = url('images').'/'.$user['image'];
-            }
-            $is_follow = 0;
-            $following_id = $follwer['id'];
-            $follower_id = $this->userId;
-            $follow = Follow::where('following_id',$following_id)->where('follower_id',$follower_id)->first();
-            if(isset($follow->id))
-            {
-                $is_follow = 1;
-            }
-            $user['is_follow'] = $is_follow;
-            $x[$key]['user'] = $user;
-            unset($x[$key]['following_user']);
+            $x->image = url('images').'/'.$x->image;
         }
-        $x = $x[0];
+        $is_follow = 0;
+        $follow = Follow::where('following_id',$following_id)->where('follower_id',$follower_id)->first();
+        if(isset($follow->id))
+        {
+            $is_follow = 1;
+        }
+        $x->is_follow = $is_follow;
+
         if($following_id == $follower_id)
         {
             $message = 'User Can not follow own';
@@ -355,15 +346,15 @@ class ProfileController extends Controller
     // notification list
     public function notificaionList()
     {
-        $Notification = Notification::with('user')->where('receiver_id',$this->userId)->get();
-        foreach($Notification as $not)
-        {
-            if($not->user->image)
-            {
-                $not->user->image = url('images').'/'.$not->user->image;
-            }
-        }
-        return response()->json(['success'=>true,'data'=>$Notification,'message'=>'Notification list successfully'], 200);
+        $Notifications = Notification::with('user')->where('receiver_id',$this->userId)->get();
+        // foreach($Notifications as $key=>$Notification)
+        // {
+        //     $user_data = $Notification->user;
+        //     $image_full = url('image/').$user_data->image;
+        //     $user_data->image = $image_full;
+        //     $Notification->user_data = $user_data;
+        // }
+        return response()->json(['success'=>true,'data'=>$Notifications,'message'=>'Notification list successfully'], 200);
     }
 
     //
@@ -371,32 +362,36 @@ class ProfileController extends Controller
     {
         $makeArr = array();
         $object = new \stdClass();
-        $object->acura = array(
-            'RDX','TLX'
-        );
-        array_push($makeArr,$object);
-        $object = new \stdClass();
-        $object->toyoto = array(
-            '4RUNNER','Avalon'
-        );
-        array_push($makeArr,$object);
-        $object = new \stdClass();
-        $object->Audi = array(
-            'A7','Q5'
-        );
-        array_push($makeArr,$object);
-        $object = new \stdClass();
-        $object->BMW = array(
-            'X3','X7'
-        );
-        array_push($makeArr,$object);
-        $object = new \stdClass();
-        $object->Buick = array(
-            'Encore','Encore GX'
-        );
+        $object->car_maker = 'acura';
+        $car_models = array('RDX','TLX');
+        $object->car_models = $car_models;
         array_push($makeArr,$object);
 
-        return response()->json(['success'=>true,'data'=>$makeArr,'message'=>'Notification list successfully'], 200);
+        $object = new \stdClass();
+        $object->car_maker = 'toyoto';
+        $car_models = array('4RUNNER','Avalon');
+        $object->car_models = $car_models;
+        array_push($makeArr,$object);
+
+        $object = new \stdClass();
+        $object->car_maker = 'Audi';
+        $car_models = array('A7','Q5');
+        $object->car_models = $car_models;
+        array_push($makeArr,$object);
+
+        $object = new \stdClass();
+        $object->car_maker = 'BMW';
+        $car_models = array('X3','X7');
+        $object->car_models = $car_models;
+        array_push($makeArr,$object);
+
+        $object = new \stdClass();
+        $object->car_maker = 'Buick';
+        $car_models = array('Encore','Encore GX');
+        $object->car_models = $car_models;
+        array_push($makeArr,$object);
+
+        return response()->json(['success'=>true,'data'=>$makeArr,'message'=>'CarMake list successfully'], 200);
     }
 
     public function updateDeviceToken(Request $request)
