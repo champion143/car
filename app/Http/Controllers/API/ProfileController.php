@@ -288,45 +288,38 @@ class ProfileController extends Controller
         $Notification->receiver_id = $receiver_id;
         $Notification->type = "challenge";
         $Notification->save();
-
         /* start push notificaion */
         $receiver_data = User::where('id',$receiver_id)->first();
         $sender_data = User::where('id',$this->userId)->first();
         $device_token = $receiver_data->device_token;
         $sender_name = $sender_data->first_name;
         $receiver_name = $receiver_data->first_name;
+        $response = $this->sendPushNotificaion($device_token,$sender_name,$Notification->id);
+        return response()->json(['success'=>true,'data'=>$Notification,'message'=>'user challenge successfully'], 200);
+    }
+
+    function sendPushNotificaion($device_token,$sender_name,$Notificationid)
+    {
         $key = 'AAAAFCC7KjQ:APA91bHm9NC4ONC_fzdn_A0fwbqPArQPb9dzbs8jn2_BNT_fZyLi1wMzH9U3FW5uayZwgq7jMuwDol8H0NxJ5gXrSXEbyxamgtuO8XO4EgCA6dCiOZbUiTFhlgXV9wDsclGATC5tucZ5';
-        /* start push notificaion */
         $ch = curl_init("https://fcm.googleapis.com/fcm/send");
-        //Title of the Notification.
-        $title = $sender_name." challenged you for the race";
-        //Body of the Notification.
+        $title = 'Race Invitaion';
         $body = "Bear island knows no king but the king in the north, whose name is stark.";
         $x = new \stdClass();
         $x->username = $sender_name;
-        $x->challenged_id = $Notification->id;
-        //Creating the notification array.
-        $notification = array('title' =>$title , 'text' => $body, 'body' => 'Hello Body','extra_data'=>$x,"content_available" => true);
-
-        //This array contains, the token and the notification. The 'to' attribute stores the token.
+        $x->challenged_id = $Notificationid;
+        $notification = array('title' =>$title , 'text' => $body, 'body' => $sender_name.' challenged you for the race','extra_data'=>$x,"content_available" => true);
         $arrayToSend = array('to' => $device_token, 'notification' => $notification,'data'=>$x,'priority'=>'high');
-        //Generating JSON encoded string form the above array.
         $json = json_encode($arrayToSend);
-        //Setup headers:
         $headers = array();
         $headers[] = 'Content-Type: application/json';
-        $headers[] = 'Authorization: key= AAAAFCC7KjQ:APA91bHm9NC4ONC_fzdn_A0fwbqPArQPb9dzbs8jn2_BNT_fZyLi1wMzH9U3FW5uayZwgq7jMuwDol8H0NxJ5gXrSXEbyxamgtuO8XO4EgCA6dCiOZbUiTFhlgXV9wDsclGATC5tucZ5'; // key here
-        //Setup curl, add headers and post parameters.
+        $headers[] = 'Authorization: key= AAAAFCC7KjQ:APA91bHm9NC4ONC_fzdn_A0fwbqPArQPb9dzbs8jn2_BNT_fZyLi1wMzH9U3FW5uayZwgq7jMuwDol8H0NxJ5gXrSXEbyxamgtuO8XO4EgCA6dCiOZbUiTFhlgXV9wDsclGATC5tucZ5';
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
         curl_setopt($ch, CURLOPT_POSTFIELDS, $json);
         curl_setopt($ch, CURLOPT_HTTPHEADER,$headers);
-        //Send the request
+        curl_setopt( $ch,CURLOPT_RETURNTRANSFER, true );
         $response = curl_exec($ch);
-        //Close request
         curl_close($ch);
-        /* end */
-
-        return response()->json(['success'=>true,'data'=>$Notification,'message'=>'user challenge successfully'], 200);
+        return $response;
     }
 
     // accept and reject
