@@ -302,7 +302,7 @@ class ProfileController extends Controller
         $title = $sender_name." challenged you for the race";
         //Body of the Notification.
         $body = "Bear island knows no king but the king in the north, whose name is stark.";
-        $x = new stdClass();
+        $x = new \stdClass();
         $x->username = $sender_name;
         $x->challenged_id = $Notification->id;
         //Creating the notification array.
