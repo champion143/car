@@ -493,9 +493,6 @@ class ProfileController extends Controller
 
             $MatchRace->other_id = $otherUserId;
         }
-
-        $MatchRace ->other_user_id = $other_user_id;
-
         if ($request->hasFile('file')) {
             $image = $request->file('file');
             $name = time().'.'.$image->getClientOriginalExtension();
@@ -512,6 +509,28 @@ class ProfileController extends Controller
                 'success'=>true,
                 'data'=> $MatchRace,
                 'message'=>'Match Data successfully'
+            ], 200);
+    }
+
+    public function winList(Request $request)
+    {
+        $MatchResult = MatchResult::where('win_user_id',$this->userId)->get();
+        return response()->json(
+            [
+                'success'=>true,
+                'data'=> $MatchResult,
+                'message'=>'Win List Get successfully'
+            ], 200);
+    }
+
+    public function lossList(Request $request)
+    {
+        $MatchResult = MatchResult::where('loss_user_id',$this->userId)->get();
+        return response()->json(
+            [
+                'success'=>true,
+                'data'=> $MatchResult,
+                'message'=>'Loss List Get successfully'
             ], 200);
     }
 }

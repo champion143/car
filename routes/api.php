@@ -40,6 +40,10 @@ Route::middleware(['ApiUserCheck'])->group(function () {
     /* update toke */
     Route::post('user/updatedeviceToken',[App\Http\Controllers\API\ProfileController::class, 'updateDeviceToken']);
     Route::post('user/audioFileUpload',[App\Http\Controllers\API\ProfileController::class, 'audioFileUpload']);
+
+    /* win and loss api */
+    Route::post('user/winList',[App\Http\Controllers\API\ProfileController::class, 'winList']);
+    Route::post('user/lossList',[App\Http\Controllers\API\ProfileController::class, 'lossList']);
 });
 Route::post('user/searchUserUsingRacerName',[App\Http\Controllers\API\CommonUserController::class, 'searchUserUsingRacerName']);
 Route::post('user/searchUserUsingUserName',[App\Http\Controllers\API\CommonUserController::class, 'searchUserUsingUserName']);
