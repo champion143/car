@@ -454,6 +454,9 @@ class ProfileController extends Controller
         $MatchRace->speed_at_green = $speed_at_green;
         $MatchRace->save();
 
+        $win_user_matchrace_id = 0;
+        $loss_user_matchrace_id = 0;
+
         $other_id = 0;
         if($challenge_id == 0)
         {
@@ -478,15 +481,21 @@ class ProfileController extends Controller
                 {
                     $win_user_id = $this->userId;
                     $loss_user_id = $otherUserId;
+                    $win_user_matchrace_id = $MatchRace->id;
+                    $loss_user_matchrace_id = $OtherUserMatchRaceData->id;
                     $MatchRace->match_result = 1;
                 }else{
                     $MatchRace->match_result = 2;
                     $win_user_id = $otherUserId;
                     $loss_user_id = $this->userId;
+                    $loss_user_matchrace_id = $MatchRace->id;
+                    $win_user_matchrace_id = $OtherUserMatchRaceData->id;
                 }
                 $MatchResult =  new MatchResult();
                 $MatchResult->win_user_id = $win_user_id;
                 $MatchResult->loss_user_id = $loss_user_id;
+                $MatchResult->win_user_matchrace_id = $win_user_matchrace_id;
+                $MatchResult->loss_user_matchrace_id = $loss_user_matchrace_id;
                 $MatchResult->save();
             }else{
                 $MatchRace->match_result = 0;
@@ -518,6 +527,16 @@ class ProfileController extends Controller
     public function winList(Request $request)
     {
         $MatchResult = MatchResult::where('win_user_id',$this->userId)->get();
+        foreach($MatchResult as $match)
+        {
+            $other_user_id = $match->loss_user_id;
+            $user = User::where('id',$other_user_id)->first();
+            if($user->image != "")
+            {
+                $user->image = url('image/').$user->image;
+            }
+            $match->user = $user;
+        }
         return response()->json(
             [
                 'success'=>true,
@@ -529,6 +548,16 @@ class ProfileController extends Controller
     public function lossList(Request $request)
     {
         $MatchResult = MatchResult::where('loss_user_id',$this->userId)->get();
+        foreach($MatchResult as $match)
+        {
+            $other_user_id = $match->win_user_id;
+            $user = User::where('id',$other_user_id)->first();
+            if($user->image != "")
+            {
+                $user->image = url('image/').$user->image;
+            }
+            $match->user = $user;
+        }
         return response()->json(
             [
                 'success'=>true,
@@ -536,4 +565,10 @@ class ProfileController extends Controller
                 'message'=>'Loss List Get successfully'
             ], 200);
     }
+
+    public function matchDetail()
+    {
+        MatchResult::where('')
+    }
+
 }
