@@ -568,7 +568,7 @@ class ProfileController extends Controller
 
     public function matchDetail()
     {
-        MatchResult::where('')
+
     }
 
 }
