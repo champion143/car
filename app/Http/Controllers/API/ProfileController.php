@@ -373,7 +373,7 @@ class ProfileController extends Controller
     // notification list
     public function notificaionList()
     {
-        $Notifications = Notification::with('user')->where('receiver_id',$this->userId)->get();
+        $Notifications = Notification::with('user')->where('receiver_id',$this->userId)->orWhere('receiver_id',$this->userId)->get();
         // foreach($Notifications as $key=>$Notification)
         // {
         //     $user_data = $Notification->user;
