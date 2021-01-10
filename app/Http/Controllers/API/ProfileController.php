@@ -328,6 +328,35 @@ class ProfileController extends Controller
         }else if($status == 2){
             $message = "Challenge Rejected Successfully";
         }
+        $notifications = Notification::where('id',$Notification_id)->first();
+        /* notification start */
+        $sender_data = User::where('id',$notifications->sender_id)->first();
+        $sender_name = $sender_data->name;
+        $device_token = $sender_data->device_token;
+        $receiver_data = User::where('id',$notifications->receiver_id)->first();
+        $receiver_name = $receiver_data->name;
+        $key = 'AAAAFCC7KjQ:APA91bHm9NC4ONC_fzdn_A0fwbqPArQPb9dzbs8jn2_BNT_fZyLi1wMzH9U3FW5uayZwgq7jMuwDol8H0NxJ5gXrSXEbyxamgtuO8XO4EgCA6dCiOZbUiTFhlgXV9wDsclGATC5tucZ5';
+        $ch = curl_init("https://fcm.googleapis.com/fcm/send");
+        $title = 'Race Invitaion';
+        $body = "Bear island knows no king but the king in the north, whose name is stark.";
+        $x = new \stdClass();
+        $x->username = $receiver_name;
+        $x->challenged_id = $Notification_id;
+        $notification = array('title' =>$title , 'text' => $body, 'body' => $message." by ".$sender_name,'extra_data'=>$x,"content_available" => true);
+        $arrayToSend = array('to' => $device_token, 'notification' => $notification,'data'=>$x,'priority'=>'high');
+        $json = json_encode($arrayToSend);
+        $headers = array();
+        $headers[] = 'Content-Type: application/json';
+        $headers[] = 'Authorization: key= AAAAFCC7KjQ:APA91bHm9NC4ONC_fzdn_A0fwbqPArQPb9dzbs8jn2_BNT_fZyLi1wMzH9U3FW5uayZwgq7jMuwDol8H0NxJ5gXrSXEbyxamgtuO8XO4EgCA6dCiOZbUiTFhlgXV9wDsclGATC5tucZ5';
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $json);
+        curl_setopt($ch, CURLOPT_HTTPHEADER,$headers);
+        curl_setopt( $ch,CURLOPT_RETURNTRANSFER, true );
+        $response = curl_exec($ch);
+        curl_close($ch);
+        /* notification end */
+
+
         $Notification = Notification::where('id',$Notification_id)->update(
             array(
                 'status' => $status
@@ -414,7 +443,8 @@ class ProfileController extends Controller
         $MatchRace = new MatchRace();
         $MatchRace->user_id = $this->userId;
         $MatchRace->challenge_id = $challenge_id;
-        $MatchRace->speed = json_encode($speed);
+        // $MatchRace->speed = json_encode($speed);
+        $MatchRace->speed = $speed;
         $MatchRace->distance = $distance;
         $MatchRace->racetype = $racetype;
         $MatchRace->speed_at_green = $speed_at_green;
