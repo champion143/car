@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Notification;
 use App\User;
 use App\MatchRace;
+use App\MatchResult;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -449,6 +450,8 @@ class ProfileController extends Controller
         $MatchRace->racetype = $racetype;
         $MatchRace->speed_at_green = $speed_at_green;
         $MatchRace->save();
+
+        $other_id = 0;
         if($challenge_id == 0)
         {
             $MatchRace->rematch_count = 0;
@@ -470,16 +473,29 @@ class ProfileController extends Controller
                 $distance2 = $OtherUserMatchRaceData->distance;
                 if($distance1 > $distance2)
                 {
+                    $win_user_id = $this->userId;
+                    $loss_user_id = $otherUserId;
                     $MatchRace->match_result = 1;
                 }else{
                     $MatchRace->match_result = 2;
+                    $win_user_id = $otherUserId;
+                    $loss_user_id = $this->userId;
                 }
+                $MatchResult =  new MatchResult();
+                $MatchResult->win_user_id = $win_user_id;
+                $MatchResult->loss_user_id = $loss_user_id;
+                $MatchResult->save();
             }else{
                 $MatchRace->match_result = 0;
             }
             $allMatchChallengeData = MatchRace::where('challenge_id',$challenge_id)->count();
             $MatchRace->rematch_count = (int)($allMatchChallengeData / 2) + 1;
+
+            $MatchRace->other_id = $otherUserId;
         }
+
+        $MatchRace ->other_user_id = $other_user_id;
+
         if ($request->hasFile('file')) {
             $image = $request->file('file');
             $name = time().'.'.$image->getClientOriginalExtension();
