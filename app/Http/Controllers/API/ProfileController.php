@@ -440,7 +440,7 @@ class ProfileController extends Controller
     // audio file store
     public function audioFileUpload(Request $request)
     {
-        $challenge_id = $request->input('challenge_id');
+        $challenge_id = (int)$request->input('challenge_id');
         $speed = $request->input('speed');
         $distance = $request->input('distance');
         $racetype = $request->input('racetype');
