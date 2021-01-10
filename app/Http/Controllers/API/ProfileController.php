@@ -443,11 +443,19 @@ class ProfileController extends Controller
         $MatchRace = new MatchRace();
         $MatchRace->user_id = $this->userId;
         $MatchRace->challenge_id = $challenge_id;
-        // $MatchRace->speed = json_encode($speed);
         $MatchRace->speed = $speed;
         $MatchRace->distance = $distance;
         $MatchRace->racetype = $racetype;
         $MatchRace->speed_at_green = $speed_at_green;
+        if($challenge_id == 0)
+        {
+            $MatchRace->rematch_count = 0;
+            $MatchRace->match_result = 0;
+        }else{
+            $Notification = Notification::where('id',$challenge_id)->first();
+            $MatchRace->rematch_count = 0;
+            $MatchRace->match_result = 0;
+        }
         if ($request->hasFile('file')) {
             $image = $request->file('file');
             $name = time().'.'.$image->getClientOriginalExtension();
@@ -463,7 +471,7 @@ class ProfileController extends Controller
         return response()->json(
             [
                 'success'=>true,
-                'data'=>$MatchRace,
+                'data'=> $MatchRace,
                 'message'=>'Match Data successfully'
             ], 200);
     }
