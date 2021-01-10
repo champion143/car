@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Response;
+use PHPUnit\Framework\Constraint\StringMatchesFormatDescription;
 
 class ProfileController extends Controller
 {
@@ -447,14 +448,37 @@ class ProfileController extends Controller
         $MatchRace->distance = $distance;
         $MatchRace->racetype = $racetype;
         $MatchRace->speed_at_green = $speed_at_green;
+        $MatchRace->save();
         if($challenge_id == 0)
         {
             $MatchRace->rematch_count = 0;
             $MatchRace->match_result = 0;
         }else{
-            $Notification = Notification::where('id',$challenge_id)->first();
-            $MatchRace->rematch_count = 0;
-            $MatchRace->match_result = 0;
+            $Notification = Notification::where('id',$challenge_id)->orderBy('id')->first();
+            $sender_id = $Notification->sender_id;
+            $receiver_id = $Notification->receiver_id;
+            if($this->userId == $sender_id)
+            {
+                $otherUserId = $receiver_id;
+            }else{
+                $otherUserId = $sender_id;
+            }
+            $OtherUserMatchRaceData = MatchRace::where('user_id',$otherUserId)->first();
+            if(isset($OtherUserMatchRaceData->id))
+            {
+                $distance1 = $distance;
+                $distance2 = $OtherUserMatchRaceData->distance;
+                if($distance1 > $distance2)
+                {
+                    $MatchRace->match_result = 1;
+                }else{
+                    $MatchRace->match_result = 2;
+                }
+            }else{
+                $MatchRace->match_result = 0;
+            }
+            $allMatchChallengeData = MatchRace::where('challenge_id',$challenge_id)->count();
+            $MatchRace->rematch_count = (int)($allMatchChallengeData / 2) + 1;
         }
         if ($request->hasFile('file')) {
             $image = $request->file('file');
@@ -463,7 +487,6 @@ class ProfileController extends Controller
             $image->move($destinationPath, $name);
             $MatchRace->file = $name;
         }
-        $MatchRace->save();
         if($MatchRace->file != "")
         {
             $MatchRace->file = url('image/').$MatchRace->file;
