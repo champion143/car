@@ -191,19 +191,11 @@ class ProfileController extends Controller
     {
         $following_id = $request->input('following_id');
         $follower_id = $this->userId;
-        $x = User::where('id',$follower_id)->first();
+        $x = User::where('id',$following_id)->first();
         if($x->image != "")
         {
             $x->image = url('images').'/'.$x->image;
         }
-        $is_follow = 0;
-        $follow = Follow::where('following_id',$following_id)->where('follower_id',$follower_id)->first();
-        if(isset($follow->id))
-        {
-            $is_follow = 1;
-        }
-        $x->is_follow = $is_follow;
-
         if($following_id == $follower_id)
         {
             $message = 'User Can not follow own';
@@ -220,12 +212,14 @@ class ProfileController extends Controller
                 {
                     Follow::where('following_id',$following_id)->where('follower_id',$follower_id)->delete();
                     $message = 'User Un-follow Successsfully';
+                    $x->is_follow = 0;
                 }else{
                     $follow = new Follow;
                     $follow->following_id = $following_id;
                     $follow->follower_id = $follower_id;
                     $follow->save();
                     $message = 'User Follow Successsfully';
+                    $x->is_follow = 1;
                 }
                 return response()->json(['success'=>true,'data'=>$x,'message'=>$message], 200);
             }
