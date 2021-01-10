@@ -336,10 +336,10 @@ class ProfileController extends Controller
         $notifications = Notification::where('id',$Notification_id)->first();
         /* notification start */
         $sender_data = User::where('id',$notifications->sender_id)->first();
-        $sender_name = $sender_data->name;
+        $sender_name = $sender_data->first_name;
         $device_token = $sender_data->device_token;
         $receiver_data = User::where('id',$notifications->receiver_id)->first();
-        $receiver_name = $receiver_data->name;
+        $receiver_name = $receiver_data->first_name;
         $key = 'AAAAFCC7KjQ:APA91bHm9NC4ONC_fzdn_A0fwbqPArQPb9dzbs8jn2_BNT_fZyLi1wMzH9U3FW5uayZwgq7jMuwDol8H0NxJ5gXrSXEbyxamgtuO8XO4EgCA6dCiOZbUiTFhlgXV9wDsclGATC5tucZ5';
         $ch = curl_init("https://fcm.googleapis.com/fcm/send");
         $title = 'Race Invitaion';
@@ -348,7 +348,7 @@ class ProfileController extends Controller
         $x->username = $receiver_name;
         $x->challenged_id = $Notification_id;
         $x->type = $type;
-        $notification = array('title' =>$title , 'text' => $body, 'body' => $message." by ".$sender_name,'extra_data'=>$x,"content_available" => true);
+        $notification = array('title' =>$title , 'text' => $body, 'body' => $message,'extra_data'=>$x,"content_available" => true);
         $arrayToSend = array('to' => $device_token, 'notification' => $notification,'data'=>$x,'priority'=>'high');
         $json = json_encode($arrayToSend);
         $headers = array();
