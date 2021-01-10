@@ -327,7 +327,7 @@ class ProfileController extends Controller
         $message = "";
         if($status == 1)
         {
-            $message = "Challenge Accespted Successfully";
+            $message = "Challenge Accepted Successfully";
             $type = 'accept';
         }else if($status == 2){
             $message = "Challenge Rejected Successfully";
