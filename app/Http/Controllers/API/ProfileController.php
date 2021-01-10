@@ -566,9 +566,34 @@ class ProfileController extends Controller
             ], 200);
     }
 
-    public function matchDetail()
+    public function matchDetail(Request $request)
     {
-
+        $id = $request->input('id');
+        $match = MatchResult::where('id',$id)->first();
+        $raceDataId = 0;
+        if($match->win_user_id == $this->userId)
+        {
+            $other_user_id = $match->loss_user_id;
+            $raceDataId = $match->win_user_matchrace_id;
+        }else{
+            $other_user_id = $match->win_user_id;
+            $raceDataId = $match->loss_user_matchrace_id;
+        }
+        $user = User::where('id',$other_user_id)->first();
+        if($user->image != "")
+        {
+            $user->image = url('image/').$user->image;
+        }
+        $MatchRace = MatchRace::where('id',$raceDataId)->first();
+        $MatchRace->file = url('image/').$MatchRace->file;
+        $match->race_data = $MatchRace;
+        $match->user = $user;
+        return response()->json(
+            [
+                'success'=>true,
+                'data'=> $match,
+                'message'=>'Match Detail Get successfully'
+            ], 200);
     }
 
 }

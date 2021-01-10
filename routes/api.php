@@ -43,6 +43,9 @@ Route::middleware(['ApiUserCheck'])->group(function () {
     /* win and loss api */
     Route::get('user/winList',[App\Http\Controllers\API\ProfileController::class, 'winList']);
     Route::get('user/lossList',[App\Http\Controllers\API\ProfileController::class, 'lossList']);
+    Route::post('user/matchDetail',[App\Http\Controllers\API\ProfileController::class, 'matchDetail']);
+
+
 });
 Route::post('user/searchUserUsingRacerName',[App\Http\Controllers\API\CommonUserController::class, 'searchUserUsingRacerName']);
 Route::post('user/searchUserUsingUserName',[App\Http\Controllers\API\CommonUserController::class, 'searchUserUsingUserName']);
