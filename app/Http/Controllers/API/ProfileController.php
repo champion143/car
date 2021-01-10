@@ -303,6 +303,7 @@ class ProfileController extends Controller
         $x = new \stdClass();
         $x->username = $sender_name;
         $x->challenged_id = $Notificationid;
+        $x->type = "invitaion";
         $notification = array('title' =>$title , 'text' => $body, 'body' => $sender_name.' challenged you for the race','extra_data'=>$x,"content_available" => true);
         $arrayToSend = array('to' => $device_token, 'notification' => $notification,'data'=>$x,'priority'=>'high');
         $json = json_encode($arrayToSend);
@@ -327,8 +328,10 @@ class ProfileController extends Controller
         if($status == 1)
         {
             $message = "Challenge Accespted Successfully";
+            $type = 'accept';
         }else if($status == 2){
             $message = "Challenge Rejected Successfully";
+            $type = 'reject';
         }
         $notifications = Notification::where('id',$Notification_id)->first();
         /* notification start */
@@ -344,6 +347,7 @@ class ProfileController extends Controller
         $x = new \stdClass();
         $x->username = $receiver_name;
         $x->challenged_id = $Notification_id;
+        $x->type = $type;
         $notification = array('title' =>$title , 'text' => $body, 'body' => $message." by ".$sender_name,'extra_data'=>$x,"content_available" => true);
         $arrayToSend = array('to' => $device_token, 'notification' => $notification,'data'=>$x,'priority'=>'high');
         $json = json_encode($arrayToSend);
@@ -357,7 +361,6 @@ class ProfileController extends Controller
         $response = curl_exec($ch);
         curl_close($ch);
         /* notification end */
-
 
         $Notification = Notification::where('id',$Notification_id)->update(
             array(

@@ -36,7 +36,6 @@ Route::middleware(['ApiUserCheck'])->group(function () {
     Route::post('user/raceChallenger',[App\Http\Controllers\API\ProfileController::class, 'raceChallenger']);
 
     Route::get('user/getCarMake',[App\Http\Controllers\API\ProfileController::class, 'getCarMake']);
-
     /* update toke */
     Route::post('user/updatedeviceToken',[App\Http\Controllers\API\ProfileController::class, 'updateDeviceToken']);
     Route::post('user/audioFileUpload',[App\Http\Controllers\API\ProfileController::class, 'audioFileUpload']);
