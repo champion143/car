@@ -327,10 +327,10 @@ class ProfileController extends Controller
         $message = "";
         if($status == 1)
         {
-            $message = "Challenge Accepted Successfully";
+            $message = "Your Invitation Accepted";
             $type = 'accept';
         }else if($status == 2){
-            $message = "Challenge Rejected Successfully";
+            $message = "Your Invitation Rejected";
             $type = 'reject';
         }
         $notifications = Notification::where('id',$Notification_id)->first();
