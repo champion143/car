@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Response;
 use PHPUnit\Framework\Constraint\StringMatchesFormatDescription;
+use stdClass;
 
 class ProfileController extends Controller
 {
@@ -373,14 +374,16 @@ class ProfileController extends Controller
     // notification list
     public function notificaionList()
     {
-        $Notifications = Notification::with('user')->where('receiver_id',$this->userId)->orWhere('receiver_id',$this->userId)->get();
-        // foreach($Notifications as $key=>$Notification)
-        // {
-        //     $user_data = $Notification->user;
-        //     $image_full = url('image/').$user_data->image;
-        //     $user_data->image = $image_full;
-        //     $Notification->user_data = $user_data;
-        // }
+        $Notifications = Notification::where('receiver_id',$this->userId)->orWhere('receiver_id',$this->userId)->get();
+        foreach($Notifications as $key=>$Notification)
+        {
+            // if($Notification->)
+            // $other_user_id =
+            // $user_data = $Notification->user;
+            // $image_full = url('image/').$user_data->image;
+            // $user_data->image = $image_full;
+            // $Notification->user_data = $user_data;
+        }
         return response()->json(['success'=>true,'data'=>$Notifications,'message'=>'Notification list successfully'], 200);
     }
 
@@ -435,6 +438,28 @@ class ProfileController extends Controller
                 'data'=>array(),
                 'message'=>'Device Token successfully'
             ], 200);
+    }
+
+    public function sendPushNotificaionForResult($x,$title,$device_token,$message)
+    {
+        /* notification start */
+        $key = 'AAAAFCC7KjQ:APA91bHm9NC4ONC_fzdn_A0fwbqPArQPb9dzbs8jn2_BNT_fZyLi1wMzH9U3FW5uayZwgq7jMuwDol8H0NxJ5gXrSXEbyxamgtuO8XO4EgCA6dCiOZbUiTFhlgXV9wDsclGATC5tucZ5';
+        $ch = curl_init("https://fcm.googleapis.com/fcm/send");
+        $title = $title;
+        $body = "Bear island knows no king but the king in the north, whose name is stark.";
+        $notification = array('title' =>$title , 'text' => $body, 'body' => $message,'extra_data'=>$x,"content_available" => true);
+        $arrayToSend = array('to' => $device_token, 'notification' => $notification,'data'=>$x,'priority'=>'high');
+        $json = json_encode($arrayToSend);
+        $headers = array();
+        $headers[] = 'Content-Type: application/json';
+        $headers[] = 'Authorization: key= AAAAFCC7KjQ:APA91bHm9NC4ONC_fzdn_A0fwbqPArQPb9dzbs8jn2_BNT_fZyLi1wMzH9U3FW5uayZwgq7jMuwDol8H0NxJ5gXrSXEbyxamgtuO8XO4EgCA6dCiOZbUiTFhlgXV9wDsclGATC5tucZ5';
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $json);
+        curl_setopt($ch, CURLOPT_HTTPHEADER,$headers);
+        curl_setopt( $ch,CURLOPT_RETURNTRANSFER, true );
+        $response = curl_exec($ch);
+        curl_close($ch);
+        /* notification end */
     }
 
     // audio file store
@@ -497,6 +522,19 @@ class ProfileController extends Controller
                 $MatchResult->win_user_matchrace_id = $win_user_matchrace_id;
                 $MatchResult->loss_user_matchrace_id = $loss_user_matchrace_id;
                 $MatchResult->save();
+
+                /* win user */
+                $winUser = User::where('id',$win_user_id)->first();
+                $title = 'Challenge result';
+                $device_token = $winUser->device_token;
+                $x = new stdClass();
+                $x->match_id = $MatchResult->id;
+                $message = ':You win race challenge!';
+                $this->sendPushNotificaionForResult($x,$title,$device_token,$message);
+                $lossUser = User::where('id',$loss_user_id)->first();
+                $device_token = $lossUser->device_token;
+                $message = 'You loss race challenge!';
+                $this->sendPushNotificaionForResult($x,$title,$device_token,$message);
             }else{
                 $MatchRace->match_result = 0;
             }
