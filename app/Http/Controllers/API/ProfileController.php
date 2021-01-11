@@ -384,7 +384,7 @@ class ProfileController extends Controller
             $otherUserData = User::where('id',$other_user_id)->first();
             if($otherUserData->image != "")
             {
-                $otherUserData->image = url('image/').$otherUserData->image;
+                $otherUserData->image = url('image').'/'.$otherUserData->image;
             }
             $Notification->user_data = $otherUserData;
         }
@@ -534,7 +534,7 @@ class ProfileController extends Controller
                 $x = new stdClass();
                 $x->match_id = $MatchResult->id;
                 $x->type = "raceresult";
-                $message = ':You win race challenge!';
+                $message = 'You win race challenge!';
                 $this->sendPushNotificaionForResult($x,$title,$device_token,$message);
                 $lossUser = User::where('id',$loss_user_id)->first();
                 $device_token = $lossUser->device_token;
@@ -557,7 +557,7 @@ class ProfileController extends Controller
         }
         if($MatchRace->file != "")
         {
-            $MatchRace->file = url('image/').$MatchRace->file;
+            $MatchRace->file = url('image').'/'.$MatchRace->file;
         }
         return response()->json(
             [
@@ -576,7 +576,7 @@ class ProfileController extends Controller
             $user = User::where('id',$other_user_id)->first();
             if($user->image != "")
             {
-                $user->image = url('image/').$user->image;
+                $user->image = url('image').'/'.$user->image;
             }
             $match->user = $user;
         }
@@ -597,7 +597,7 @@ class ProfileController extends Controller
             $user = User::where('id',$other_user_id)->first();
             if($user->image != "")
             {
-                $user->image = url('image/').$user->image;
+                $user->image = url('image').'/'.$user->image;
             }
             $match->user = $user;
         }
@@ -625,10 +625,10 @@ class ProfileController extends Controller
         $user = User::where('id',$other_user_id)->first();
         if($user->image != "")
         {
-            $user->image = url('image/').$user->image;
+            $user->image = url('image').'/'.$user->image;
         }
         $MatchRace = MatchRace::where('id',$raceDataId)->first();
-        $MatchRace->file = url('image/').$MatchRace->file;
+        $MatchRace->file = url('image').'/'.$MatchRace->file;
         $match->race_data = $MatchRace;
         $match->user = $user;
         return response()->json(
