@@ -386,7 +386,7 @@ class ProfileController extends Controller
             {
                 $otherUserData->image = url('image').'/'.$otherUserData->image;
             }
-            $Notification->user_data = $otherUserData;
+            $Notification->user = $otherUserData;
         }
         return response()->json(['success'=>true,'data'=>$Notifications,'message'=>'Notification list successfully'], 200);
     }
