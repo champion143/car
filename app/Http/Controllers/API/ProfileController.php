@@ -529,6 +529,7 @@ class ProfileController extends Controller
                 $device_token = $winUser->device_token;
                 $x = new stdClass();
                 $x->match_id = $MatchResult->id;
+                $x->type = "raceresult";
                 $message = ':You win race challenge!';
                 $this->sendPushNotificaionForResult($x,$title,$device_token,$message);
                 $lossUser = User::where('id',$loss_user_id)->first();
