@@ -374,15 +374,19 @@ class ProfileController extends Controller
     // notification list
     public function notificaionList()
     {
-        $Notifications = Notification::where('receiver_id',$this->userId)->orWhere('receiver_id',$this->userId)->get();
+        $Notifications = Notification::where('sender_id',$this->userId)->orWhere('receiver_id',$this->userId)->get();
         foreach($Notifications as $key=>$Notification)
         {
-            // if($Notification->)
-            // $other_user_id =
-            // $user_data = $Notification->user;
-            // $image_full = url('image/').$user_data->image;
-            // $user_data->image = $image_full;
-            // $Notification->user_data = $user_data;
+            if($Notification->receiver_id == $this->userId)
+                $other_user_id = $Notification->sender_id;
+            else
+                $other_user_id = $Notification->receiver_id;
+            $otherUserData = User::where('id',$other_user_id)->first();
+            if($otherUserData->image != "")
+            {
+                $otherUserData->image = url('image/').$otherUserData->image;
+            }
+            $Notification->user_data = $otherUserData;
         }
         return response()->json(['success'=>true,'data'=>$Notifications,'message'=>'Notification list successfully'], 200);
     }
