@@ -628,6 +628,7 @@ class ProfileController extends Controller
             $user->image = url('image').'/'.$user->image;
         }
         $MatchRace = MatchRace::where('id',$raceDataId)->first();
+        if($MatchRace->file != "")
         $MatchRace->file = url('image').'/'.$MatchRace->file;
         $match->race_data = $MatchRace;
         $match->user = $user;
