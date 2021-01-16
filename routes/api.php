@@ -16,6 +16,9 @@ Route::post('login', [App\Http\Controllers\API\UserController::class, 'login']);
 Route::post('register', [App\Http\Controllers\API\UserController::class, 'register']);
 Route::post('forgot-password', [App\Http\Controllers\API\UserController::class, 'forgot_password']);
 
+/* other user route */
+Route::post('otherUserGetProfile', [App\Http\Controllers\API\UserController::class, 'otherUserGetProfile']);
+/* end */
 
 Route::post('test', [App\Http\Controllers\API\UserController::class, 'test']);
 
@@ -45,6 +48,8 @@ Route::middleware(['ApiUserCheck'])->group(function () {
     Route::get('user/lossList',[App\Http\Controllers\API\ProfileController::class, 'lossList']);
     Route::post('user/matchDetail',[App\Http\Controllers\API\ProfileController::class, 'matchDetail']);
 
+    /* start race api */
+    Route::post('user/startRace',[App\Http\Controllers\API\ProfileController::class, 'startRace']);
 
 });
 Route::post('user/searchUserUsingRacerName',[App\Http\Controllers\API\CommonUserController::class, 'searchUserUsingRacerName']);

@@ -86,4 +86,53 @@ class CommonUserController extends Controller
                 'message'=>'User List Get successfully'
             ], 200);
     }
+
+    /* other user follow and following list */
+    public function followerList()
+    {
+        $userId = $this->input('user_id');
+        $follwerList = Follow::where('following_id',$userId)->where('follower_id','!=',$this->userId)->with('followingUser')->get();
+        $follwerList = $follwerList->toArray();
+        foreach($follwerList as $key=>$follwer)
+        {
+            $user = $follwer['following_user'];
+            if($user['image'] != "")
+            {
+                $user['image'] = url('images').'/'.$user['image'];
+            }
+            $is_follow = 0;
+            $following_id = $user['id'];
+            $follower_id = $this->userId;
+            $follow = Follow::where('following_id',$following_id)->where('follower_id',$follower_id)->first();
+            if(isset($follow->id))
+            {
+                $is_follow = 1;
+            }
+            $user['is_follow'] = $is_follow;
+
+            $follwerList[$key]['user'] = $user;
+            unset($follwerList[$key]['following_user']);
+        }
+        return response()->json(['success'=>true,'data'=>$follwerList,'message'=>"Follower List Get Successfully"], 200);
+    }
+
+    // followers list
+    public function followingList()
+    {
+        $userId = $this->input('user_id');
+        $followingList = Follow::where('follower_id',$userId)->where('following_id','!=',$this->userId)->with('followerUser')->get();
+        $followingList = $followingList->toArray();
+        foreach($followingList as $key=>$follwer)
+        {
+            $user = $follwer['follower_user'];
+            if($user['image'] != "")
+            {
+                $user['image'] = url('images').'/'.$user['image'];
+            }
+            $user['is_follow'] = 1;
+            $followingList[$key]['user'] = $user;
+            unset($followingList[$key]['follower_user']);
+        }
+        return response()->json(['success'=>true,'data'=>$followingList,'message'=>"Following List Get Successfully"], 200);
+    }
 }

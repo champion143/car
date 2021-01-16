@@ -54,8 +54,8 @@ class ProfileController extends Controller
             // $userDetail->followingList = $followingList;
             $userDetail->follower_count = Follow::where('following_id',$userDetail->id)->count();
             $userDetail->following_count = Follow::where('follower_id',$userDetail->id)->count();
-            $userDetail->win_count = 0;
-            $userDetail->loss_count = 0;
+            $userDetail->win_count = MatchResult::where('win_user_id',$this->userId)->count();
+            $userDetail->loss_count = MatchResult::where('loss_user_id',$this->userId)->count();
             if($userDetail->image != "")
             {
                 $userDetail->image = url('images').'/'.$userDetail->image;
@@ -283,6 +283,7 @@ class ProfileController extends Controller
         $Notification = new Notification;
         $Notification->sender_id = $this->userId;
         $Notification->receiver_id = $receiver_id;
+        $Notification->race_type = $request->input('race_type','');
         $Notification->type = "challenge";
         $Notification->save();
         /* start push notificaion */
@@ -291,11 +292,11 @@ class ProfileController extends Controller
         $device_token = $receiver_data->device_token;
         $sender_name = $sender_data->first_name;
         $receiver_name = $receiver_data->first_name;
-        $response = $this->sendPushNotificaion($device_token,$sender_name,$Notification->id);
+        $response = $this->sendPushNotificaion($device_token,$sender_name,$Notification->id,$Notification->race_type);
         return response()->json(['success'=>true,'data'=>$Notification,'message'=>'user challenge successfully'], 200);
     }
 
-    function sendPushNotificaion($device_token,$sender_name,$Notificationid)
+    function sendPushNotificaion($device_token,$sender_name,$Notificationid,$race_type="")
     {
         $key = 'AAAAFCC7KjQ:APA91bHm9NC4ONC_fzdn_A0fwbqPArQPb9dzbs8jn2_BNT_fZyLi1wMzH9U3FW5uayZwgq7jMuwDol8H0NxJ5gXrSXEbyxamgtuO8XO4EgCA6dCiOZbUiTFhlgXV9wDsclGATC5tucZ5';
         $ch = curl_init("https://fcm.googleapis.com/fcm/send");
@@ -305,6 +306,7 @@ class ProfileController extends Controller
         $x->username = $sender_name;
         $x->challenged_id = $Notificationid;
         $x->type = "invitaion";
+        $x->race_type = $race_type;
         $notification = array('title' =>$title , 'text' => $body, 'body' => $sender_name.' challenged you for the race','extra_data'=>$x,"content_available" => true);
         $arrayToSend = array('to' => $device_token, 'notification' => $notification,'data'=>$x,'priority'=>'high');
         $json = json_encode($arrayToSend);
@@ -349,6 +351,7 @@ class ProfileController extends Controller
         $x->username = $receiver_name;
         $x->challenged_id = $Notification_id;
         $x->type = $type;
+        $x->race_type = $notifications->race_type;
         $notification = array('title' =>$title , 'text' => $body, 'body' => $message,'extra_data'=>$x,"content_available" => true);
         $arrayToSend = array('to' => $device_token, 'notification' => $notification,'data'=>$x,'priority'=>'high');
         $json = json_encode($arrayToSend);
@@ -371,10 +374,57 @@ class ProfileController extends Controller
         return response()->json(['success'=>true,'data'=>$Notification,'message'=>$message], 200);
     }
 
+    /* start race */
+    public function startRace(Request $request)
+    {
+        $notification_id = $request->input('notification_id');
+        $Notification = Notification::where('id',$notification_id)->first();
+
+        $sender_data = User::where('id',$Notification->sender_id)->first();
+        $sender_name = $sender_data->first_name;
+        $sender_token = $sender_data->device_token;
+        $this->silentNotificaion($sender_token,$sender_name,$Notification);
+
+        $receiver_data = User::where('id',$Notification->receiver_id)->first();
+        $receiver_name = $receiver_data->first_name;
+        $receiver_token = $receiver_data->device_token;
+        // $receiver_token = 'cQeJije-c0FcukaUNyiEhF:APA91bEqmLbqJ7DfnMMHgVTPwBWcunvm8TemazfnHA-OLeCTZNirH9JhfPjxsOej6Y5i7Mg6d6fRpWFBELmMTUbSGPX47sszSUsTAEaa3Kcok9GFSLfnG_Uq3-rFVYNoRZNWaTnTaQxD';
+        $this->silentNotificaion($receiver_token,$receiver_name,$Notification);
+
+        return response()->json(['success'=>true,'data'=>array(),'message'=>"Start Race Notificaions send successfully"], 200);
+    }
+
+    /* silent notificaion */
+    public function silentNotificaion($device_token,$name,$notifications)
+    {
+        $key = 'AAAAFCC7KjQ:APA91bHm9NC4ONC_fzdn_A0fwbqPArQPb9dzbs8jn2_BNT_fZyLi1wMzH9U3FW5uayZwgq7jMuwDol8H0NxJ5gXrSXEbyxamgtuO8XO4EgCA6dCiOZbUiTFhlgXV9wDsclGATC5tucZ5';
+        $ch = curl_init("https://fcm.googleapis.com/fcm/send");
+        $title = '';
+        $body = "";
+        $message = "";
+        $x = new \stdClass();
+        $x->username = $name;
+        $x->challenged_id = $notifications->id;
+        $x->type = 'startrace';
+        $x->race_type = $notifications->race_type;
+        $notification = array('title' =>$title , 'text' => $body, 'body' => $message,'extra_data'=>$x,"content_available" => true);
+        $arrayToSend = array('to' => $device_token, 'notification' => $notification,'data'=>$x,'priority'=>'high');
+        $json = json_encode($arrayToSend);
+        $headers = array();
+        $headers[] = 'Content-Type: application/json';
+        $headers[] = 'Authorization: key= AAAAFCC7KjQ:APA91bHm9NC4ONC_fzdn_A0fwbqPArQPb9dzbs8jn2_BNT_fZyLi1wMzH9U3FW5uayZwgq7jMuwDol8H0NxJ5gXrSXEbyxamgtuO8XO4EgCA6dCiOZbUiTFhlgXV9wDsclGATC5tucZ5';
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $json);
+        curl_setopt($ch, CURLOPT_HTTPHEADER,$headers);
+        curl_setopt( $ch,CURLOPT_RETURNTRANSFER, true );
+        $response = curl_exec($ch);
+        curl_close($ch);
+    }
+
     // notification list
     public function notificaionList()
     {
-        $Notifications = Notification::where('sender_id',$this->userId)->orWhere('receiver_id',$this->userId)->get();
+        $Notifications = Notification::where('status',0)::where('sender_id',$this->userId)->orWhere('receiver_id',$this->userId)->get();
         foreach($Notifications as $key=>$Notification)
         {
             if($Notification->receiver_id == $this->userId)
@@ -384,7 +434,7 @@ class ProfileController extends Controller
             $otherUserData = User::where('id',$other_user_id)->first();
             if($otherUserData->image != "")
             {
-                $otherUserData->image = url('image').'/'.$otherUserData->image;
+                $otherUserData->image = url('images').'/'.$otherUserData->image;
             }
             $Notification->user = $otherUserData;
         }
@@ -574,7 +624,7 @@ class ProfileController extends Controller
             $user = User::where('id',$other_user_id)->first();
             if($user->image != "")
             {
-                $user->image = url('image').'/'.$user->image;
+                $user->image = url('images').'/'.$user->image;
             }
             $match->user = $user;
         }
@@ -595,7 +645,7 @@ class ProfileController extends Controller
             $user = User::where('id',$other_user_id)->first();
             if($user->image != "")
             {
-                $user->image = url('image').'/'.$user->image;
+                $user->image = url('images').'/'.$user->image;
             }
             $match->user = $user;
         }
@@ -616,19 +666,28 @@ class ProfileController extends Controller
         {
             $other_user_id = $match->loss_user_id;
             $raceDataId = $match->win_user_matchrace_id;
+            $raceDataOtherId = $match->loss_user_matchrace_id;
         }else{
             $other_user_id = $match->win_user_id;
             $raceDataId = $match->loss_user_matchrace_id;
+            $raceDataOtherId = $match->win_user_matchrace_id;
         }
         $user = User::where('id',$other_user_id)->first();
         if($user->image != "")
         {
-            $user->image = url('image').'/'.$user->image;
+            $user->image = url('images').'/'.$user->image;
         }
+
         $MatchRace = MatchRace::where('id',$raceDataId)->first();
         if($MatchRace->file != "")
-        $MatchRace->file = url('image').'/'.$MatchRace->file;
+        $MatchRace->file = url('images').'/'.$MatchRace->file;
         $match->race_data = $MatchRace;
+
+        $MatchRace1 = MatchRace::where('id',$raceDataOtherId)->first();
+        if($MatchRace1->file != "")
+        $MatchRace1->file = url('images').'/'.$MatchRace1->file;
+        $match->race_other_data = $MatchRace1;
+
         $match->user = $user;
         return response()->json(
             [
