@@ -564,46 +564,54 @@ class ProfileController extends Controller
             }else{
                 $otherUserId = $sender_id;
             }
-            $OtherUserMatchRaceData = MatchRace::where('user_id',$otherUserId)->first();
-            if(isset($OtherUserMatchRaceData->id))
-            {
-                $distance1 = $distance;
-                $distance2 = $OtherUserMatchRaceData->distance;
-                if($distance1 > $distance2)
-                {
-                    $win_user_id = $this->userId;
-                    $loss_user_id = $otherUserId;
-                    $win_user_matchrace_id = $MatchRace->id;
-                    $loss_user_matchrace_id = $OtherUserMatchRaceData->id;
-                    $MatchRace->matchresult = 1;
-                }else{
-                    $MatchRace->matchresult = 2;
-                    $win_user_id = $otherUserId;
-                    $loss_user_id = $this->userId;
-                    $loss_user_matchrace_id = $MatchRace->id;
-                    $win_user_matchrace_id = $OtherUserMatchRaceData->id;
-                }
-                $MatchResult =  new MatchResult();
-                $MatchResult->win_user_id = $win_user_id;
-                $MatchResult->loss_user_id = $loss_user_id;
-                $MatchResult->win_user_matchrace_id = $win_user_matchrace_id;
-                $MatchResult->loss_user_matchrace_id = $loss_user_matchrace_id;
-                $MatchResult->save();
 
-                /* win user */
-                $winUser = User::where('id',$win_user_id)->first();
-                $title = 'Challenge result';
-                $device_token = $winUser->device_token;
-                $x = new stdClass();
-                $x->match_id = $MatchResult->id;
-                $x->type = "raceresult";
-                $message = 'You win race challenge!';
-                $this->sendPushNotificaionForResult($x,$title,$device_token,$message);
-                $lossUser = User::where('id',$loss_user_id)->first();
-                $device_token = $lossUser->device_token;
-                $message = 'You loss race challenge!';
-                $this->sendPushNotificaionForResult($x,$title,$device_token,$message);
-            }else{
+            $user1Count = MatchRace::where('challenge_id',$challenge_id)->where('user_id',$otherUserId)->count();
+            $user2Count = MatchRace::where('challenge_id',$challenge_id)->where('user_id',$this->userId)->count();
+
+            if($user1Count == $user2Count)
+            {
+                $OtherUserMatchRaceData = MatchRace::where('user_id',$otherUserId)->orderBy('id','desc')->first();
+                if(isset($OtherUserMatchRaceData->id))
+                {
+                    $distance1 = $distance;
+                    $distance2 = $OtherUserMatchRaceData->distance;
+                    if($distance1 > $distance2)
+                    {
+                        $win_user_id = $this->userId;
+                        $loss_user_id = $otherUserId;
+                        $win_user_matchrace_id = $MatchRace->id;
+                        $loss_user_matchrace_id = $OtherUserMatchRaceData->id;
+                        $MatchRace->matchresult = 1;
+                    }else{
+                        $MatchRace->matchresult = 2;
+                        $win_user_id = $otherUserId;
+                        $loss_user_id = $this->userId;
+                        $loss_user_matchrace_id = $MatchRace->id;
+                        $win_user_matchrace_id = $OtherUserMatchRaceData->id;
+                    }
+                    $MatchResult =  new MatchResult();
+                    $MatchResult->win_user_id = $win_user_id;
+                    $MatchResult->loss_user_id = $loss_user_id;
+                    $MatchResult->win_user_matchrace_id = $win_user_matchrace_id;
+                    $MatchResult->loss_user_matchrace_id = $loss_user_matchrace_id;
+                    $MatchResult->save();
+
+                    /* win user */
+                    $winUser = User::where('id',$win_user_id)->first();
+                    $title = 'Challenge result';
+                    $device_token = $winUser->device_token;
+                    $x = new stdClass();
+                    $x->match_id = $MatchResult->id;
+                    $x->type = "raceresult";
+                    $message = 'You win race challenge!';
+                    $this->sendPushNotificaionForResult($x,$title,$device_token,$message);
+                    $lossUser = User::where('id',$loss_user_id)->first();
+                    $device_token = $lossUser->device_token;
+                    $message = 'You loss race challenge!';
+                    $this->sendPushNotificaionForResult($x,$title,$device_token,$message);
+                }
+            }
+            else{
                 $MatchRace->matchresult = 0;
             }
             $allMatchChallengeData = MatchRace::where('challenge_id',$challenge_id)->count();
@@ -615,6 +623,51 @@ class ProfileController extends Controller
                 'success'=>true,
                 'data'=> $MatchRace,
                 'message'=>'Match Data successfully'
+            ], 200);
+    }
+
+    /* match status change */
+    public function matchStatusChange(Request $request)
+    {
+        $match_id = $request->input('match_id');
+        $status = $request->input('status');
+        MatchResult::where('id',$match_id)->update(
+            array(
+                'status' => $status
+            )
+        );
+        return response()->json(
+            [
+                'success'=>true,
+                'data'=> array(),
+                'message'=>'Match Status successfully'
+            ], 200);
+    }
+
+    public function noContentList(Request $request)
+    {
+        $MatchResult = MatchResult::where('status',3)->where(function($query)
+                                    {
+                                        $query->where('win_user_id',$this->userId)
+                                        ->orWhere('loss_user_id',$this->userId);
+                                    })
+
+        ->where('win_user_id',$this->userId)->where('loss_user_id',$this->userId)->get();
+        foreach($MatchResult as $match)
+        {
+            $other_user_id = $match->win_user_id;
+            $user = User::where('id',$other_user_id)->first();
+            if($user->image != "")
+            {
+                $user->image = url('images').'/'.$user->image;
+            }
+            $match->user = $user;
+        }
+        return response()->json(
+            [
+                'success'=>true,
+                'data'=> $MatchResult,
+                'message'=>'Loss List Get successfully'
             ], 200);
     }
 
@@ -670,15 +723,15 @@ class ProfileController extends Controller
         {
             $other_user_id = $match->loss_user_id;
             $raceDataId = $match->win_user_matchrace_id;
-            $raceDataString = "win";
+            $raceDataString = 1;
             $raceDataOtherId = $match->loss_user_matchrace_id;
-            $raceDataOtherString = "loss";
+            $raceDataOtherString = 2;
         }else{
             $other_user_id = $match->win_user_id;
             $raceDataId = $match->loss_user_matchrace_id;
-            $raceDataString = "loss";
+            $raceDataString = 2;
             $raceDataOtherId = $match->win_user_matchrace_id;
-            $raceDataOtherString = "win";
+            $raceDataOtherString = 1;
         }
         $user = User::where('id',$other_user_id)->first();
         if($user->image != "")

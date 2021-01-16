@@ -18,6 +18,8 @@ Route::post('forgot-password', [App\Http\Controllers\API\UserController::class, 
 
 /* other user route */
 Route::post('otherUserGetProfile', [App\Http\Controllers\API\UserController::class, 'otherUserGetProfile']);
+Route::post('otherUserFollowerList', [App\Http\Controllers\API\CommonUserController::class, 'otherUserFollowerList']);
+Route::post('otherUserFollowerList', [App\Http\Controllers\API\CommonUserController::class, 'otherUserFollowerList']);
 /* end */
 
 Route::post('test', [App\Http\Controllers\API\UserController::class, 'test']);

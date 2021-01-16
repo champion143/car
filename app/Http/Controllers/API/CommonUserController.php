@@ -88,7 +88,7 @@ class CommonUserController extends Controller
     }
 
     /* other user follow and following list */
-    public function followerList()
+    public function otherUserFollowerList()
     {
         $userId = $this->input('user_id');
         $follwerList = Follow::where('following_id',$userId)->where('follower_id','!=',$this->userId)->with('followingUser')->get();
@@ -117,7 +117,7 @@ class CommonUserController extends Controller
     }
 
     // followers list
-    public function followingList()
+    public function otherUserFollowingList()
     {
         $userId = $this->input('user_id');
         $followingList = Follow::where('follower_id',$userId)->where('following_id','!=',$this->userId)->with('followerUser')->get();
