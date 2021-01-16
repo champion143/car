@@ -383,11 +383,13 @@ class ProfileController extends Controller
         $sender_data = User::where('id',$Notification->sender_id)->first();
         $sender_name = $sender_data->first_name;
         $sender_token = $sender_data->device_token;
+        // $sender_token = 'cQeJije-c0FcukaUNyiEhF:APA91bEqmLbqJ7DfnMMHgVTPwBWcunvm8TemazfnHA-OLeCTZNirH9JhfPjxsOej6Y5i7Mg6d6fRpWFBELmMTUbSGPX47sszSUsTAEaa3Kcok9GFSLfnG_Uq3-rFVYNoRZNWaTnTaQxD';
         $this->silentNotificaion($sender_token,$sender_name,$Notification);
 
         $receiver_data = User::where('id',$Notification->receiver_id)->first();
         $receiver_name = $receiver_data->first_name;
         $receiver_token = $receiver_data->device_token;
+        // $receiver_token = 'cMsK78Rlb0fyr2mNDsNX_Q:APA91bGNAG9xOdAlhavi_oI0f5AszllHWCPymXuBOPUgZBczpsis7Y-FTq439wz3TS_xxyEIfN3bSg3f0TB6E9eqfrfnQiBOp56ZFxWIWOzF9ImfvRQPSEBGpuJCPsUHAjU6biJT3vcp';
         $this->silentNotificaion($receiver_token,$receiver_name,$Notification);
 
         return response()->json(['success'=>true,'data'=>array(),'message'=>"Start Race Notificaions send successfully"], 200);
@@ -398,15 +400,15 @@ class ProfileController extends Controller
     {
         $key = 'AAAAFCC7KjQ:APA91bHm9NC4ONC_fzdn_A0fwbqPArQPb9dzbs8jn2_BNT_fZyLi1wMzH9U3FW5uayZwgq7jMuwDol8H0NxJ5gXrSXEbyxamgtuO8XO4EgCA6dCiOZbUiTFhlgXV9wDsclGATC5tucZ5';
         $ch = curl_init("https://fcm.googleapis.com/fcm/send");
-        $title = '';
-        $body = "";
+        $title = 'Click here to start race';
+        $body = "Click here to start race";
         $message = "";
         $x = new \stdClass();
         $x->username = $name;
         $x->challenged_id = $notifications->id;
         $x->type = 'startrace';
         $x->race_type = $notifications->race_type;
-        $notification = array('title' =>$title , 'text' => $body, 'body' => $message,'extra_data'=>$x, "sound" => "","content_available" => true);
+        $notification = array('title' =>$title , 'text' => $body, 'body' => $message,'extra_data'=>$x,"content_available" => true);
         $arrayToSend = array('to' => $device_token, 'notification' => $notification,'data'=>$x,'priority'=>'high');
         $json = json_encode($arrayToSend);
         $headers = array();
