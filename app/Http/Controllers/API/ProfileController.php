@@ -388,7 +388,6 @@ class ProfileController extends Controller
         $receiver_data = User::where('id',$Notification->receiver_id)->first();
         $receiver_name = $receiver_data->first_name;
         $receiver_token = $receiver_data->device_token;
-        // $receiver_token = 'cQeJije-c0FcukaUNyiEhF:APA91bEqmLbqJ7DfnMMHgVTPwBWcunvm8TemazfnHA-OLeCTZNirH9JhfPjxsOej6Y5i7Mg6d6fRpWFBELmMTUbSGPX47sszSUsTAEaa3Kcok9GFSLfnG_Uq3-rFVYNoRZNWaTnTaQxD';
         $this->silentNotificaion($receiver_token,$receiver_name,$Notification);
 
         return response()->json(['success'=>true,'data'=>array(),'message'=>"Start Race Notificaions send successfully"], 200);
@@ -539,6 +538,12 @@ class ProfileController extends Controller
             $MatchRace->file = $name;
         }
         $MatchRace->save();
+
+        if($MatchRace->file != "")
+        {
+            $MatchRace->file = url('images').'/'.$MatchRace->file;
+        }
+
         $win_user_matchrace_id = 0;
         $loss_user_matchrace_id = 0;
 
@@ -601,10 +606,6 @@ class ProfileController extends Controller
             }
             $allMatchChallengeData = MatchRace::where('challenge_id',$challenge_id)->count();
             $MatchRace->rematchcount = (int)($allMatchChallengeData / 2) + 1;
-            if($MatchRace->file != "")
-            {
-                $MatchRace->file = url('images').'/'.$MatchRace->file;
-            }
             $MatchRace->other_id = $otherUserId;
         }
         return response()->json(
