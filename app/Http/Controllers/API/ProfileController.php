@@ -488,10 +488,6 @@ class ProfileController extends Controller
             $image->move($destinationPath, $name);
             $MatchRace->file = $name;
         }
-        if($MatchRace->file != "")
-        {
-            $MatchRace->file = url('image').'/'.$MatchRace->file;
-        }
         $MatchRace->save();
         $win_user_matchrace_id = 0;
         $loss_user_matchrace_id = 0;
@@ -555,7 +551,10 @@ class ProfileController extends Controller
             }
             $allMatchChallengeData = MatchRace::where('challenge_id',$challenge_id)->count();
             $MatchRace->rematch_count = (int)($allMatchChallengeData / 2) + 1;
-
+            if($MatchRace->file != "")
+            {
+                $MatchRace->file = url('image').'/'.$MatchRace->file;
+            }
             $MatchRace->other_id = $otherUserId;
         }
         return response()->json(
