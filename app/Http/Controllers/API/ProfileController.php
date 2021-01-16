@@ -481,8 +481,18 @@ class ProfileController extends Controller
         $MatchRace->distance = $distance;
         $MatchRace->racetype = $racetype;
         $MatchRace->speed_at_green = $speed_at_green;
+        if ($request->hasFile('file')) {
+            $image = $request->file('file');
+            $name = time().'.'.$image->getClientOriginalExtension();
+            $destinationPath = public_path('/images');
+            $image->move($destinationPath, $name);
+            $MatchRace->file = $name;
+        }
+        if($MatchRace->file != "")
+        {
+            $MatchRace->file = url('image').'/'.$MatchRace->file;
+        }
         $MatchRace->save();
-
         $win_user_matchrace_id = 0;
         $loss_user_matchrace_id = 0;
 
@@ -547,17 +557,6 @@ class ProfileController extends Controller
             $MatchRace->rematch_count = (int)($allMatchChallengeData / 2) + 1;
 
             $MatchRace->other_id = $otherUserId;
-        }
-        if ($request->hasFile('file')) {
-            $image = $request->file('file');
-            $name = time().'.'.$image->getClientOriginalExtension();
-            $destinationPath = public_path('/images');
-            $image->move($destinationPath, $name);
-            $MatchRace->file = $name;
-        }
-        if($MatchRace->file != "")
-        {
-            $MatchRace->file = url('image').'/'.$MatchRace->file;
         }
         return response()->json(
             [
