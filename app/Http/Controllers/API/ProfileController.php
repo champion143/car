@@ -301,7 +301,7 @@ class ProfileController extends Controller
         $key = 'AAAAFCC7KjQ:APA91bHm9NC4ONC_fzdn_A0fwbqPArQPb9dzbs8jn2_BNT_fZyLi1wMzH9U3FW5uayZwgq7jMuwDol8H0NxJ5gXrSXEbyxamgtuO8XO4EgCA6dCiOZbUiTFhlgXV9wDsclGATC5tucZ5';
         $ch = curl_init("https://fcm.googleapis.com/fcm/send");
         $title = 'Race Invitaion';
-        $body = "Bear island knows no king but the king in the north, whose name is stark.";
+        $body = "";
         $x = new \stdClass();
         $x->username = $sender_name;
         $x->challenged_id = $Notificationid;
@@ -346,7 +346,7 @@ class ProfileController extends Controller
         $key = 'AAAAFCC7KjQ:APA91bHm9NC4ONC_fzdn_A0fwbqPArQPb9dzbs8jn2_BNT_fZyLi1wMzH9U3FW5uayZwgq7jMuwDol8H0NxJ5gXrSXEbyxamgtuO8XO4EgCA6dCiOZbUiTFhlgXV9wDsclGATC5tucZ5';
         $ch = curl_init("https://fcm.googleapis.com/fcm/send");
         $title = 'Race Invitaion';
-        $body = "Bear island knows no king but the king in the north, whose name is stark.";
+        $body = "";
         $x = new \stdClass();
         $x->username = $receiver_name;
         $x->challenged_id = $Notification_id;
@@ -406,7 +406,7 @@ class ProfileController extends Controller
         $x->challenged_id = $notifications->id;
         $x->type = 'startrace';
         $x->race_type = $notifications->race_type;
-        $notification = array('title' =>$title , 'text' => $body, 'body' => $message,'extra_data'=>$x,"content_available" => true);
+        $notification = array('title' =>$title , 'text' => $body, 'body' => $message,'extra_data'=>$x, "sound" => "","content_available" => true);
         $arrayToSend = array('to' => $device_token, 'notification' => $notification,'data'=>$x,'priority'=>'high');
         $json = json_encode($arrayToSend);
         $headers = array();
@@ -499,7 +499,7 @@ class ProfileController extends Controller
         $key = 'AAAAFCC7KjQ:APA91bHm9NC4ONC_fzdn_A0fwbqPArQPb9dzbs8jn2_BNT_fZyLi1wMzH9U3FW5uayZwgq7jMuwDol8H0NxJ5gXrSXEbyxamgtuO8XO4EgCA6dCiOZbUiTFhlgXV9wDsclGATC5tucZ5';
         $ch = curl_init("https://fcm.googleapis.com/fcm/send");
         $title = $title;
-        $body = "Bear island knows no king but the king in the north, whose name is stark.";
+        $body = "";
         $notification = array('title' =>$title , 'text' => $body, 'body' => $message,'extra_data'=>$x,"content_available" => true);
         $arrayToSend = array('to' => $device_token, 'notification' => $notification,'data'=>$x,'priority'=>'high');
         $json = json_encode($arrayToSend);
