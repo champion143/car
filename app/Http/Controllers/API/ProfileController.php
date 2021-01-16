@@ -399,8 +399,8 @@ class ProfileController extends Controller
         $key = 'AAAAFCC7KjQ:APA91bHm9NC4ONC_fzdn_A0fwbqPArQPb9dzbs8jn2_BNT_fZyLi1wMzH9U3FW5uayZwgq7jMuwDol8H0NxJ5gXrSXEbyxamgtuO8XO4EgCA6dCiOZbUiTFhlgXV9wDsclGATC5tucZ5';
         $ch = curl_init("https://fcm.googleapis.com/fcm/send");
         $title = 'Start race';
-        $body = "please be ready to race";
-        $message = "please be ready to race";
+        $body = "Please be ready to race";
+        $message = "Please be ready to race";
         $x = new \stdClass();
         $x->username = $name;
         $x->challenged_id = $notifications->id;
@@ -423,7 +423,7 @@ class ProfileController extends Controller
     // notification list
     public function notificaionList()
     {
-        $Notifications = Notification::where('status',0)::where('sender_id',$this->userId)->orWhere('receiver_id',$this->userId)->get();
+        $Notifications = Notification::where('status',0)->where('sender_id',$this->userId)->orWhere('receiver_id',$this->userId)->get();
         foreach($Notifications as $key=>$Notification)
         {
             if($Notification->receiver_id == $this->userId)
