@@ -545,8 +545,8 @@ class ProfileController extends Controller
         $other_id = 0;
         if($challenge_id == 0)
         {
-            $MatchRace->rematch_count = 0;
-            $MatchRace->match_result = 0;
+            $MatchRace->rematchcount = 0;
+            $MatchRace->matchresult = 0;
         }else{
             $Notification = Notification::where('id',$challenge_id)->orderBy('id')->first();
             $sender_id = $Notification->sender_id;
@@ -568,9 +568,9 @@ class ProfileController extends Controller
                     $loss_user_id = $otherUserId;
                     $win_user_matchrace_id = $MatchRace->id;
                     $loss_user_matchrace_id = $OtherUserMatchRaceData->id;
-                    $MatchRace->match_result = 1;
+                    $MatchRace->matchresult = 1;
                 }else{
-                    $MatchRace->match_result = 2;
+                    $MatchRace->matchresult = 2;
                     $win_user_id = $otherUserId;
                     $loss_user_id = $this->userId;
                     $loss_user_matchrace_id = $MatchRace->id;
@@ -597,10 +597,10 @@ class ProfileController extends Controller
                 $message = 'You loss race challenge!';
                 $this->sendPushNotificaionForResult($x,$title,$device_token,$message);
             }else{
-                $MatchRace->match_result = 0;
+                $MatchRace->matchresult = 0;
             }
             $allMatchChallengeData = MatchRace::where('challenge_id',$challenge_id)->count();
-            $MatchRace->rematch_count = (int)($allMatchChallengeData / 2) + 1;
+            $MatchRace->rematchcount = (int)($allMatchChallengeData / 2) + 1;
             if($MatchRace->file != "")
             {
                 $MatchRace->file = url('images').'/'.$MatchRace->file;
@@ -662,15 +662,20 @@ class ProfileController extends Controller
         $id = $request->input('id');
         $match = MatchResult::where('id',$id)->first();
         $raceDataId = 0;
+        $rematchCount = 0;
         if($match->win_user_id == $this->userId)
         {
             $other_user_id = $match->loss_user_id;
             $raceDataId = $match->win_user_matchrace_id;
+            $raceDataString = "win";
             $raceDataOtherId = $match->loss_user_matchrace_id;
+            $raceDataOtherString = "loss";
         }else{
             $other_user_id = $match->win_user_id;
             $raceDataId = $match->loss_user_matchrace_id;
+            $raceDataString = "loss";
             $raceDataOtherId = $match->win_user_matchrace_id;
+            $raceDataOtherString = "win";
         }
         $user = User::where('id',$other_user_id)->first();
         if($user->image != "")
@@ -678,15 +683,26 @@ class ProfileController extends Controller
             $user->image = url('images').'/'.$user->image;
         }
 
+        /* rematch count*/
+        $rematchCount = 0;
+        $rematchCount1 = MatchResult::where('win_user_id',$this->userId)->where('loss_user_id',$other_user_id)->count();
+        $rematchCount2 = MatchResult::where('loss_user_id',$this->userId)->where('win_user_id',$other_user_id)->count();
+        $rematchCount = $rematchCount1 + $rematchCount2;
+        /* end */
+
         $MatchRace = MatchRace::where('id',$raceDataId)->first();
         if($MatchRace->file != "")
         $MatchRace->file = url('images').'/'.$MatchRace->file;
-        $match->race_data = $MatchRace;
+        $MatchRace->matchresult = $raceDataString;
+        $MatchRace->rematchcount = $rematchCount;
+        $match->racedata = $MatchRace;
 
         $MatchRace1 = MatchRace::where('id',$raceDataOtherId)->first();
         if($MatchRace1->file != "")
         $MatchRace1->file = url('images').'/'.$MatchRace1->file;
-        $match->race_other_data = $MatchRace1;
+        $MatchRace1->matchresult = $raceDataOtherString;
+        $MatchRace1->rematchcount = $rematchCount;
+        $match->raceotherdata = $MatchRace1;
 
         $match->user = $user;
         return response()->json(
