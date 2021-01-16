@@ -553,7 +553,7 @@ class ProfileController extends Controller
             $MatchRace->rematch_count = (int)($allMatchChallengeData / 2) + 1;
             if($MatchRace->file != "")
             {
-                $MatchRace->file = url('image').'/'.$MatchRace->file;
+                $MatchRace->file = url('images').'/'.$MatchRace->file;
             }
             $MatchRace->other_id = $otherUserId;
         }
