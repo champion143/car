@@ -398,9 +398,9 @@ class ProfileController extends Controller
     {
         $key = 'AAAAFCC7KjQ:APA91bHm9NC4ONC_fzdn_A0fwbqPArQPb9dzbs8jn2_BNT_fZyLi1wMzH9U3FW5uayZwgq7jMuwDol8H0NxJ5gXrSXEbyxamgtuO8XO4EgCA6dCiOZbUiTFhlgXV9wDsclGATC5tucZ5';
         $ch = curl_init("https://fcm.googleapis.com/fcm/send");
-        $title = 'start race';
+        $title = 'Start race';
         $body = "please be ready to race";
-        $message = "";
+        $message = "please be ready to race";
         $x = new \stdClass();
         $x->username = $name;
         $x->challenged_id = $notifications->id;
