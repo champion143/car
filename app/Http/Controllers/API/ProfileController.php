@@ -293,21 +293,21 @@ class ProfileController extends Controller
         $sender_name = $sender_data->first_name;
         $receiver_name = $receiver_data->first_name;
         $response = $this->sendPushNotificaion($device_token,$sender_name,$Notification->id,$Notification->race_type);
-        return response()->json(['success'=>true,'data'=>$Notification,'message'=>'user challenge successfully'], 200);
+        return response()->json(['success'=>true,'data'=>$Notification,'message'=>'Challenge Sent'], 200);
     }
 
     function sendPushNotificaion($device_token,$sender_name,$Notificationid,$race_type="")
     {
         $key = 'AAAAFCC7KjQ:APA91bHm9NC4ONC_fzdn_A0fwbqPArQPb9dzbs8jn2_BNT_fZyLi1wMzH9U3FW5uayZwgq7jMuwDol8H0NxJ5gXrSXEbyxamgtuO8XO4EgCA6dCiOZbUiTFhlgXV9wDsclGATC5tucZ5';
         $ch = curl_init("https://fcm.googleapis.com/fcm/send");
-        $title = $sender_name.' challenged you to a race';
+        $title = $sender_name.' challenged you';
         $body = "";
         $x = new \stdClass();
         $x->username = $sender_name;
         $x->challenged_id = $Notificationid;
         $x->type = "invitaion";
         $x->race_type = $race_type;
-        $notification = array('title' =>$title , 'text' => $body, 'body' => $sender_name.' challenged you for the race','extra_data'=>$x,"content_available" => true);
+        $notification = array('title' =>$title , 'text' => $body, 'body' => $sender_name.' challenged you','extra_data'=>$x,"content_available" => true);
         $arrayToSend = array('to' => $device_token, 'notification' => $notification,'data'=>$x,'priority'=>'high');
         $json = json_encode($arrayToSend);
         $headers = array();
