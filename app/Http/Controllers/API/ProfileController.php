@@ -644,7 +644,7 @@ class ProfileController extends Controller
 
     public function noContentList(Request $request)
     {
-        $MatchResult = MatchResult::where('status',3)->where(function($query)
+        $MatchResult = MatchResult::where('status',1)->where(function($query)
                                     {
                                         $query->where('win_user_id',$this->userId)
                                         ->orWhere('loss_user_id',$this->userId);
@@ -665,13 +665,13 @@ class ProfileController extends Controller
             [
                 'success'=>true,
                 'data'=> $MatchResult,
-                'message'=>'Loss List Get successfully'
+                'message'=>'No Contest List Get successfully'
             ], 200);
     }
 
     public function winList(Request $request)
     {
-        $MatchResult = MatchResult::where('win_user_id',$this->userId)->get();
+        $MatchResult = MatchResult::where('status',0)->where('win_user_id',$this->userId)->get();
         foreach($MatchResult as $match)
         {
             $other_user_id = $match->loss_user_id;
@@ -690,9 +690,11 @@ class ProfileController extends Controller
             ], 200);
     }
 
+    // update win
+
     public function lossList(Request $request)
     {
-        $MatchResult = MatchResult::where('loss_user_id',$this->userId)->get();
+        $MatchResult = MatchResult::where('status',0)->where('loss_user_id',$this->userId)->get();
         foreach($MatchResult as $match)
         {
             $other_user_id = $match->win_user_id;

@@ -53,6 +53,10 @@ Route::middleware(['ApiUserCheck'])->group(function () {
     /* start race api */
     Route::post('user/startRace',[App\Http\Controllers\API\ProfileController::class, 'startRace']);
 
+    /* nocontest list */
+    Route::get('user/noContentList',[App\Http\Controllers\API\ProfileController::class, 'noContentList']);
+    Route::post('user/matchStatusChange',[App\Http\Controllers\API\ProfileController::class, 'matchStatusChange']);
+
 });
 Route::post('user/searchUserUsingRacerName',[App\Http\Controllers\API\CommonUserController::class, 'searchUserUsingRacerName']);
 Route::post('user/searchUserUsingUserName',[App\Http\Controllers\API\CommonUserController::class, 'searchUserUsingUserName']);
