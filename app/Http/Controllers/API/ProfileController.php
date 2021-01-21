@@ -601,11 +601,11 @@ class ProfileController extends Controller
                     $x = new stdClass();
                     $x->match_id = $MatchResult->id;
                     $x->type = "raceresult";
-                    $message = 'You win race challenge!';
+                    $message = 'You won';
                     $this->sendPushNotificaionForResult($x,$title,$device_token,$message);
                     $lossUser = User::where('id',$loss_user_id)->first();
                     $device_token = $lossUser->device_token;
-                    $message = 'You loss race challenge!';
+                    $message = 'You lose';
                     $this->sendPushNotificaionForResult($x,$title,$device_token,$message);
                 }
             }
