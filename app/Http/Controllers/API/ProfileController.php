@@ -648,9 +648,7 @@ class ProfileController extends Controller
                                     {
                                         $query->where('win_user_id',$this->userId)
                                         ->orWhere('loss_user_id',$this->userId);
-                                    })
-
-        ->where('win_user_id',$this->userId)->where('loss_user_id',$this->userId)->get();
+                                    })->get();
         foreach($MatchResult as $match)
         {
             $other_user_id = $match->win_user_id;
