@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Car;
 use App\Follow;
 use App\Http\Controllers\Controller;
 use App\User;
@@ -88,10 +89,10 @@ class CommonUserController extends Controller
     }
 
     /* other user follow and following list */
-    public function otherUserFollowerList()
+    public function otherUserFollowerList(Request $request)
     {
-        $userId = $this->input('user_id');
-        $follwerList = Follow::where('following_id',$userId)->where('follower_id','!=',$this->userId)->with('followingUser')->get();
+        $userId = $request->input('user_id');
+        $follwerList = Follow::where('following_id',$userId)->with('followingUser')->get();
         $follwerList = $follwerList->toArray();
         foreach($follwerList as $key=>$follwer)
         {
@@ -109,7 +110,6 @@ class CommonUserController extends Controller
                 $is_follow = 1;
             }
             $user['is_follow'] = $is_follow;
-
             $follwerList[$key]['user'] = $user;
             unset($follwerList[$key]['following_user']);
         }
@@ -117,10 +117,10 @@ class CommonUserController extends Controller
     }
 
     // followers list
-    public function otherUserFollowingList()
+    public function otherUserFollowingList(Request $request)
     {
-        $userId = $this->input('user_id');
-        $followingList = Follow::where('follower_id',$userId)->where('following_id','!=',$this->userId)->with('followerUser')->get();
+        $userId = $request->input('user_id');
+        $followingList = Follow::where('follower_id',$userId)->with('followerUser')->get();
         $followingList = $followingList->toArray();
         foreach($followingList as $key=>$follwer)
         {
@@ -129,7 +129,15 @@ class CommonUserController extends Controller
             {
                 $user['image'] = url('images').'/'.$user['image'];
             }
-            $user['is_follow'] = 1;
+            $is_follow = 0;
+            $following_id = $user['id'];
+            $follower_id = $this->userId;
+            $follow = Follow::where('following_id',$following_id)->where('follower_id',$follower_id)->first();
+            if(isset($follow->id))
+            {
+                $is_follow = 1;
+            }
+            $user['is_follow'] = $is_follow;
             $followingList[$key]['user'] = $user;
             unset($followingList[$key]['follower_user']);
         }

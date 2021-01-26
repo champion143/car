@@ -687,9 +687,6 @@ class ProfileController extends Controller
                 'message'=>'Win List Get successfully'
             ], 200);
     }
-
-    // update win
-
     public function lossList(Request $request)
     {
         $MatchResult = MatchResult::where('status',0)->where('loss_user_id',$this->userId)->get();

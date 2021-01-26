@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use App\Car;
 use App\Follow;
+use App\MatchRace;
 use App\MatchResult;
 use Illuminate\Support\Facades\Password;
 use stdClass;
@@ -169,6 +170,147 @@ class UserController extends Controller
         }else{
             return response()->json(['success'=>false,'data'=>$x,'message'=>'user not found'], 401);
         }
+    }
+
+    // car list
+    public function otherUserCarList(Request $request)
+    {
+        $userId = $request->input('user_id');
+        $carList = Car::where('user_id',$userId)->get();
+        foreach($carList as $car)
+        {
+            if($car->image != "")
+            {
+                $car->image = url('images').'/'.$car->image;
+            }
+        }
+        return response()->json(['success'=>true,'data'=>$carList,'message'=>'Car List Retrieve successfully'], 200);
+    }
+
+    public function noContentList(Request $request)
+    {
+        $userId = $request->input('user_id');
+        $MatchResult = MatchResult::where('status',1)->where(function($query) use ($userId)
+                                    {
+                                        $query->where('win_user_id',$userId)
+                                        ->orWhere('loss_user_id',$userId);
+                                    })->get();
+        foreach($MatchResult as $match)
+        {
+            $other_user_id = $match->win_user_id;
+            $user = User::where('id',$other_user_id)->first();
+            if($user->image != "")
+            {
+                $user->image = url('images').'/'.$user->image;
+            }
+            $match->user = $user;
+        }
+        return response()->json(
+            [
+                'success'=>true,
+                'data'=> $MatchResult,
+                'message'=>'No Contest List Get successfully'
+            ], 200);
+    }
+
+    public function winList(Request $request)
+    {
+        $userId = $request->input('user_id');
+        $MatchResult = MatchResult::where('status',0)->where('win_user_id',$userId)->get();
+        foreach($MatchResult as $match)
+        {
+            $other_user_id = $match->loss_user_id;
+            $user = User::where('id',$other_user_id)->first();
+            if($user->image != "")
+            {
+                $user->image = url('images').'/'.$user->image;
+            }
+            $match->user = $user;
+        }
+        return response()->json(
+            [
+                'success'=>true,
+                'data'=> $MatchResult,
+                'message'=>'Win List Get successfully'
+            ], 200);
+    }
+    public function lossList(Request $request)
+    {
+        $userId = $request->input('user_id');
+        $MatchResult = MatchResult::where('status',0)->where('loss_user_id',$userId)->get();
+        foreach($MatchResult as $match)
+        {
+            $other_user_id = $match->win_user_id;
+            $user = User::where('id',$other_user_id)->first();
+            if($user->image != "")
+            {
+                $user->image = url('images').'/'.$user->image;
+            }
+            $match->user = $user;
+        }
+        return response()->json(
+            [
+                'success'=>true,
+                'data'=> $MatchResult,
+                'message'=>'Loss List Get successfully'
+            ], 200);
+    }
+
+    public function matchDetail(Request $request)
+    {
+        $userId = $request->input('userId');
+        $id = $request->input('id');
+        $match = MatchResult::where('id',$id)->first();
+        $raceDataId = 0;
+        $rematchCount = 0;
+        if($match->win_user_id == $userId)
+        {
+            $other_user_id = $match->loss_user_id;
+            $raceDataId = $match->win_user_matchrace_id;
+            $raceDataString = 1;
+            $raceDataOtherId = $match->loss_user_matchrace_id;
+            $raceDataOtherString = 2;
+        }else{
+            $other_user_id = $match->win_user_id;
+            $raceDataId = $match->loss_user_matchrace_id;
+            $raceDataString = 2;
+            $raceDataOtherId = $match->win_user_matchrace_id;
+            $raceDataOtherString = 1;
+        }
+        $user = User::where('id',$other_user_id)->first();
+        if($user->image != "")
+        {
+            $user->image = url('images').'/'.$user->image;
+        }
+
+        /* rematch count*/
+        $rematchCount = 0;
+        $rematchCount1 = MatchResult::where('win_user_id',$userId)->where('loss_user_id',$other_user_id)->count();
+        $rematchCount2 = MatchResult::where('loss_user_id',$userId)->where('win_user_id',$other_user_id)->count();
+        $rematchCount = $rematchCount1 + $rematchCount2;
+        /* end */
+
+        $MatchRace = MatchRace::where('id',$raceDataId)->first();
+        if($MatchRace->file != "")
+        $MatchRace->file = url('images').'/'.$MatchRace->file;
+        $MatchRace->matchresult = $raceDataString;
+        $MatchRace->rematchcount = $rematchCount;
+        $match->racedata = $MatchRace;
+
+        $MatchRace1 = MatchRace::where('id',$raceDataOtherId)->first();
+        if($MatchRace1->file != "")
+        $MatchRace1->file = url('images').'/'.$MatchRace1->file;
+        $MatchRace1->matchresult = $raceDataOtherString;
+        $MatchRace1->rematchcount = $rematchCount;
+        $match->raceotherdata = $MatchRace1;
+
+        $match->user = $user;
+        return response()->json(
+            [
+                'success'=>true,
+                'data'=> $match,
+                'message'=>'Match Detail Get successfully'
+            ], 200);
     }
 
 }

@@ -18,8 +18,14 @@ Route::post('forgot-password', [App\Http\Controllers\API\UserController::class, 
 
 /* other user route */
 Route::post('otherUserGetProfile', [App\Http\Controllers\API\UserController::class, 'otherUserGetProfile']);
+Route::post('otherUserFollowingList', [App\Http\Controllers\API\CommonUserController::class, 'otherUserFollowingList']);
 Route::post('otherUserFollowerList', [App\Http\Controllers\API\CommonUserController::class, 'otherUserFollowerList']);
-Route::post('otherUserFollowerList', [App\Http\Controllers\API\CommonUserController::class, 'otherUserFollowerList']);
+Route::post('otherUserCarList', [App\Http\Controllers\API\UserController::class, 'otherUserCarList']);
+
+Route::post('noContentList', [App\Http\Controllers\API\UserController::class, 'noContentList']);
+Route::post('winList', [App\Http\Controllers\API\UserController::class, 'winList']);
+Route::post('lossList', [App\Http\Controllers\API\UserController::class, 'lossList']);
+Route::post('matchDetail', [App\Http\Controllers\API\UserController::class, 'matchDetail']);
 /* end */
 
 Route::post('test', [App\Http\Controllers\API\UserController::class, 'test']);
