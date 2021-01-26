@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Car;
 use App\Follow;
 use App\Http\Controllers\Controller;
+use App\MatchResult;
 use App\User;
 use Illuminate\Http\Request;
 
@@ -143,4 +144,46 @@ class CommonUserController extends Controller
         }
         return response()->json(['success'=>true,'data'=>$followingList,'message'=>"Following List Get Successfully"], 200);
     }
+
+     /* other user get profile */
+     public function otherUserGetProfile(Request $request)
+     {
+         $userId = $request->input('user_id');
+         $x = new \stdClass();
+         $userDetail = User::where('id',$userId)->first();
+         if(isset($userDetail->id))
+         {
+             $userDetail->follower_count = Follow::where('following_id',$userDetail->id)->count();
+             $userDetail->following_count = Follow::where('follower_id',$userDetail->id)->count();
+             $userDetail->win_count = MatchResult::where('win_user_id',$userId)->count();
+             $userDetail->loss_count = MatchResult::where('loss_user_id',$userId)->count();
+
+             $is_follow = 0;
+             $following_id = $userId;
+             $follower_id = $this->userId;
+             $follow = Follow::where('following_id',$following_id)->where('follower_id',$follower_id)->first();
+             if(isset($follow->id))
+             {
+                 $is_follow = 1;
+             }
+             $userDetail->is_follow = $is_follow;
+
+             if($userDetail->image != "")
+             {
+                 $userDetail->image = url('images').'/'.$userDetail->image;
+             }
+             $carList = Car::where('user_id',$userId)->get();
+             foreach($carList as $car)
+             {
+                 if($car->image != "")
+                 {
+                     $car->image = url('images').'/'.$car->image;
+                 }
+             }
+             $userDetail->carList = $carList;
+             return response()->json(['success'=>true,'data'=>$userDetail,'message'=>'user profile get successfully'], 200);
+         }else{
+             return response()->json(['success'=>false,'data'=>$x,'message'=>'user not found'], 401);
+         }
+     }
 }
