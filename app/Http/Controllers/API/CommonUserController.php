@@ -92,7 +92,7 @@ class CommonUserController extends Controller
     public function otherUserFollowerList(Request $request)
     {
         $userId = $request->input('user_id');
-        $follwerList = Follow::where('following_id',$userId)->with('followingUser')->get();
+        $follwerList = Follow::where('following_id',$userId)->where('follower_id','!=',$this->userId)->with('followingUser')->get();
         $follwerList = $follwerList->toArray();
         foreach($follwerList as $key=>$follwer)
         {
@@ -120,7 +120,7 @@ class CommonUserController extends Controller
     public function otherUserFollowingList(Request $request)
     {
         $userId = $request->input('user_id');
-        $followingList = Follow::where('follower_id',$userId)->with('followerUser')->get();
+        $followingList = Follow::where('follower_id',$userId)->where('following_id','!=',$this->userId)->with('followerUser')->get();
         $followingList = $followingList->toArray();
         foreach($followingList as $key=>$follwer)
         {
