@@ -81,14 +81,14 @@ class ProfileController extends Controller
         $userDetail = array();
         $userDetail['first_name'] = $request->input('first_name');
         $userDetail['last_name'] = $request->input('last_name');
-        $userDetail['racername'] = $request->input('racername');
-        $userDetail['zipcode'] = $request->input('zipcode');
-        $check = User::where('id','!=',$this->userId)->where('racername',$request->input('racername'))->first();
-        if(isset($check->id))
-        {
-            $object = new \stdClass();
-            return response()->json(['success'=>false,'data'=>$object,'message'=>'racername already exist'], 401);
-        }else{
+        // $userDetail['racername'] = $request->input('racername');
+        // $userDetail['zipcode'] = $request->input('zipcode');
+        // $check = User::where('id','!=',$this->userId)->where('racername',$request->input('racername'))->first();
+        // if(isset($check->id))
+        // {
+        //     $object = new \stdClass();
+        //     return response()->json(['success'=>false,'data'=>$object,'message'=>'racername already exist'], 401);
+        // }else{
             if ($request->hasFile('image')) {
                 $image = $request->file('image');
                 $name = time().'.'.$image->getClientOriginalExtension();
@@ -109,7 +109,7 @@ class ProfileController extends Controller
                 $userData->image = url('images').'/'.$userData->image;
             }
             return response()->json(['success'=>true,'data'=>$userData,'message'=>'User Profile Updated successfully'], 200);
-        }
+        // }
     }
 
     // get cart list
