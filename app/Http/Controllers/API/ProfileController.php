@@ -83,26 +83,33 @@ class ProfileController extends Controller
         $userDetail['last_name'] = $request->input('last_name');
         $userDetail['racername'] = $request->input('racername');
         $userDetail['zipcode'] = $request->input('zipcode');
-        if ($request->hasFile('image')) {
-            $image = $request->file('image');
-            $name = time().'.'.$image->getClientOriginalExtension();
-            $destinationPath = public_path('/images');
-            $image->move($destinationPath, $name);
-            $userDetail['image'] = $name;
-        }
-        if($request->has('address'))
+        $check = User::where('id','!=',$this->userId)->where('racername',$request->input('racername'))->first();
+        if(isset($check->id))
         {
-            $userDetail['address'] = $request->input('address');
+            $object = new \stdClass();
+            return response()->json(['success'=>false,'data'=>$object,'message'=>'racername already exist'], 401);
         }else{
-            $userDetail['address'] = "";
+            if ($request->hasFile('image')) {
+                $image = $request->file('image');
+                $name = time().'.'.$image->getClientOriginalExtension();
+                $destinationPath = public_path('/images');
+                $image->move($destinationPath, $name);
+                $userDetail['image'] = $name;
+            }
+            if($request->has('address'))
+            {
+                $userDetail['address'] = $request->input('address');
+            }else{
+                $userDetail['address'] = "";
+            }
+            User::where('id',$this->userId)->update($userDetail);
+            $userData = User::where('id',$this->userId)->first();
+            if($userData->image != "")
+            {
+                $userData->image = url('images').'/'.$userData->image;
+            }
+            return response()->json(['success'=>true,'data'=>$userData,'message'=>'User Profile Updated successfully'], 200);
         }
-        User::where('id',$this->userId)->update($userDetail);
-        $userData = User::where('id',$this->userId)->first();
-        if($userData->image != "")
-        {
-            $userData->image = url('images').'/'.$userData->image;
-        }
-        return response()->json(['success'=>true,'data'=>$userData,'message'=>'User Profile Updated successfully'], 200);
     }
 
     // get cart list
