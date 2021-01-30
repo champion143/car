@@ -228,9 +228,6 @@ class ProfileController extends Controller
             $x->image = url('images').'/'.$x->image;
         }
 
-        $x->follower_count = Follow::where('following_id',$following_id)->count();
-        $x->following_count = Follow::where('follower_id',$following_id)->count();
-
         $winCount = 0;
         $lossCount = 0;
         $MatchResult = MatchResult::where(function($query) use ($following_id)
@@ -282,6 +279,10 @@ class ProfileController extends Controller
                     $message = 'User Follow Successsfully';
                     $x->is_follow = 1;
                 }
+
+                $x->follower_count = Follow::where('following_id',$following_id)->count();
+                $x->following_count = Follow::where('follower_id',$following_id)->count();
+
                 return response()->json(['success'=>true,'data'=>$x,'message'=>$message], 200);
             }
         }
