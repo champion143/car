@@ -48,14 +48,35 @@ class ProfileController extends Controller
         $userDetail = User::where('api_token',$request->header('token'))->first();
         if(isset($userDetail->id))
         {
-            // $follwerList = Follow::where('following_id',$this->userId)->with('followingUser')->get();
-            // $followingList = Follow::where('follower_id',$this->userId)->with('followerUser')->get();
-            // $userDetail->follwerList = $follwerList;
-            // $userDetail->followingList = $followingList;
             $userDetail->follower_count = Follow::where('following_id',$userDetail->id)->count();
             $userDetail->following_count = Follow::where('follower_id',$userDetail->id)->count();
-            $userDetail->win_count = MatchResult::where('win_user_id',$this->userId)->count();
-            $userDetail->loss_count = MatchResult::where('loss_user_id',$this->userId)->count();
+
+            $winCount = 0;
+            $lossCount = 0;
+            $MatchResult = MatchResult::where(function($query)
+                                        {
+                                            $query->where('win_user_id',$this->userId)
+                                            ->orWhere('loss_user_id',$this->userId);
+                                        })->get();
+            foreach($MatchResult as $match)
+            {
+                if($match->win_user_id == $this->userId && $match->win_user_status == 1)
+                {
+                    $winCount++;
+                }else if($match->loss_user_id == $this->userId && $match->loss_user_status == 1)
+                {
+                    $winCount++;
+                }else if($match->win_user_id == $this->userId && $match->win_user_status == 2)
+                {
+                    $lossCount++;
+                }else if($match->loss_user_id == $this->userId && $match->loss_user_status == 2)
+                {
+                    $lossCount++;
+                }
+            }
+            $userDetail->win_count = $winCount;
+            $userDetail->loss_count = $lossCount;
+
             if($userDetail->image != "")
             {
                 $userDetail->image = url('images').'/'.$userDetail->image;
@@ -206,6 +227,36 @@ class ProfileController extends Controller
         {
             $x->image = url('images').'/'.$x->image;
         }
+
+        $x->follower_count = Follow::where('following_id',$following_id)->count();
+        $x->following_count = Follow::where('follower_id',$following_id)->count();
+
+        $winCount = 0;
+        $lossCount = 0;
+        $MatchResult = MatchResult::where(function($query) use ($following_id)
+                                    {
+                                        $query->where('win_user_id',$following_id)
+                                        ->orWhere('loss_user_id',$following_id);
+                                    })->get();
+        foreach($MatchResult as $match)
+        {
+            if($match->win_user_id == $following_id && $match->win_user_status == 1)
+            {
+                $winCount++;
+            }else if($match->loss_user_id == $following_id && $match->loss_user_status == 1)
+            {
+                $winCount++;
+            }else if($match->win_user_id == $following_id && $match->win_user_status == 2)
+            {
+                $lossCount++;
+            }else if($match->loss_user_id == $following_id && $match->loss_user_status == 2)
+            {
+                $lossCount++;
+            }
+        }
+        $x->win_count = $winCount;
+        $x->loss_count = $lossCount;
+
         if($following_id == $follower_id)
         {
             $message = 'User Can not follow own';
@@ -608,11 +659,11 @@ class ProfileController extends Controller
                     $x = new stdClass();
                     $x->match_id = $MatchResult->id;
                     $x->type = "raceresult";
-                    $message = 'You won';
+                    $message = 'Both Participants Data are uploaded';
                     $this->sendPushNotificaionForResult($x,$title,$device_token,$message);
                     $lossUser = User::where('id',$loss_user_id)->first();
                     $device_token = $lossUser->device_token;
-                    $message = 'You lose';
+                    $message = 'Both Participants Data are uploaded';
                     $this->sendPushNotificaionForResult($x,$title,$device_token,$message);
                 }
             }
@@ -636,11 +687,21 @@ class ProfileController extends Controller
     {
         $match_id = $request->input('match_id');
         $status = $request->input('status');
-        MatchResult::where('id',$match_id)->update(
-            array(
-                'status' => $status
-            )
-        );
+        $MatchResult = MatchResult::where('id',$match_id)->first();
+        if($MatchResult->win_user_id == $this->userId)
+        {
+            MatchResult::where('id',$match_id)->update(
+                array(
+                    'win_user_status' => $status
+                )
+            );
+        }else{
+            MatchResult::where('id',$match_id)->update(
+                array(
+                    'loss_user_status' => $status
+                )
+            );
+        }
         return response()->json(
             [
                 'success'=>true,
@@ -651,68 +712,185 @@ class ProfileController extends Controller
 
     public function noContentList(Request $request)
     {
-        $MatchResult = MatchResult::where('status',1)->where(function($query)
+        $dataArray = array();
+        $MatchResult = MatchResult::where(function($query)
                                     {
                                         $query->where('win_user_id',$this->userId)
                                         ->orWhere('loss_user_id',$this->userId);
                                     })->get();
+
         foreach($MatchResult as $match)
         {
-            $other_user_id = $match->win_user_id;
-            $user = User::where('id',$other_user_id)->first();
-            if($user->image != "")
+            if($match->win_user_id == $this->userId && $match->win_user_status == 3)
             {
-                $user->image = url('images').'/'.$user->image;
+                $other_user_id = $match->loss_user_id;
+                $user = User::where('id',$other_user_id)->first();
+                if($user->image != "")
+                {
+                    $user->image = url('images').'/'.$user->image;
+                }
+                $match->user = $user;
+                array_push($dataArray,$match);
+            }else if($match->loss_user_id == $this->userId && $match->loss_user_status == 3)
+            {
+                $other_user_id = $match->win_user_id;
+                $user = User::where('id',$other_user_id)->first();
+                if($user->image != "")
+                {
+                    $user->image = url('images').'/'.$user->image;
+                }
+                $match->user = $user;
+                array_push($dataArray,$match);
             }
-            $match->user = $user;
         }
+
         return response()->json(
             [
                 'success'=>true,
-                'data'=> $MatchResult,
+                'data'=> $dataArray,
                 'message'=>'No Contest List Get successfully'
             ], 200);
+
+        // $MatchResult = MatchResult::where('status',1)->where(function($query)
+        //                             {
+        //                                 $query->where('win_user_id',$this->userId)
+        //                                 ->orWhere('loss_user_id',$this->userId);
+        //                             })->get();
+        // foreach($MatchResult as $match)
+        // {
+        //     $other_user_id = $match->win_user_id;
+        //     $user = User::where('id',$other_user_id)->first();
+        //     if($user->image != "")
+        //     {
+        //         $user->image = url('images').'/'.$user->image;
+        //     }
+        //     $match->user = $user;
+        // }
+        // return response()->json(
+        //     [
+        //         'success'=>true,
+        //         'data'=> $MatchResult,
+        //         'message'=>'No Contest List Get successfully'
+        //     ], 200);
     }
 
     public function winList(Request $request)
     {
-        $MatchResult = MatchResult::where('status',0)->where('win_user_id',$this->userId)->get();
+        $dataArray = array();
+        $MatchResult = MatchResult::where(function($query)
+                                    {
+                                        $query->where('win_user_id',$this->userId)
+                                        ->orWhere('loss_user_id',$this->userId);
+                                    })->get();
+
         foreach($MatchResult as $match)
         {
-            $other_user_id = $match->loss_user_id;
-            $user = User::where('id',$other_user_id)->first();
-            if($user->image != "")
+            if($match->win_user_id == $this->userId && $match->win_user_status == 1)
             {
-                $user->image = url('images').'/'.$user->image;
+                $other_user_id = $match->loss_user_id;
+                $user = User::where('id',$other_user_id)->first();
+                if($user->image != "")
+                {
+                    $user->image = url('images').'/'.$user->image;
+                }
+                $match->user = $user;
+                array_push($dataArray,$match);
+            }else if($match->loss_user_id == $this->userId && $match->loss_user_status == 1)
+            {
+                $other_user_id = $match->win_user_id;
+                $user = User::where('id',$other_user_id)->first();
+                if($user->image != "")
+                {
+                    $user->image = url('images').'/'.$user->image;
+                }
+                $match->user = $user;
+                array_push($dataArray,$match);
             }
-            $match->user = $user;
         }
+
         return response()->json(
             [
                 'success'=>true,
-                'data'=> $MatchResult,
+                'data'=> $dataArray,
                 'message'=>'Win List Get successfully'
             ], 200);
+
+        // $MatchResult = MatchResult::where('status',0)->where('win_user_id',$this->userId)->get();
+        // foreach($MatchResult as $match)
+        // {
+        //     $other_user_id = $match->loss_user_id;
+        //     $user = User::where('id',$other_user_id)->first();
+        //     if($user->image != "")
+        //     {
+        //         $user->image = url('images').'/'.$user->image;
+        //     }
+        //     $match->user = $user;
+        // }
+        // return response()->json(
+        //     [
+        //         'success'=>true,
+        //         'data'=> $MatchResult,
+        //         'message'=>'Win List Get successfully'
+        //     ], 200);
     }
     public function lossList(Request $request)
     {
-        $MatchResult = MatchResult::where('status',0)->where('loss_user_id',$this->userId)->get();
+        $dataArray = array();
+        $MatchResult = MatchResult::where(function($query)
+                                    {
+                                        $query->where('win_user_id',$this->userId)
+                                        ->orWhere('loss_user_id',$this->userId);
+                                    })->get();
+
         foreach($MatchResult as $match)
         {
-            $other_user_id = $match->win_user_id;
-            $user = User::where('id',$other_user_id)->first();
-            if($user->image != "")
+            if($match->win_user_id == $this->userId && $match->win_user_status == 2)
             {
-                $user->image = url('images').'/'.$user->image;
+                $other_user_id = $match->loss_user_id;
+                $user = User::where('id',$other_user_id)->first();
+                if($user->image != "")
+                {
+                    $user->image = url('images').'/'.$user->image;
+                }
+                $match->user = $user;
+                array_push($dataArray,$match);
+            }else if($match->loss_user_id == $this->userId && $match->loss_user_status == 2)
+            {
+                $other_user_id = $match->win_user_id;
+                $user = User::where('id',$other_user_id)->first();
+                if($user->image != "")
+                {
+                    $user->image = url('images').'/'.$user->image;
+                }
+                $match->user = $user;
+                array_push($dataArray,$match);
             }
-            $match->user = $user;
         }
+
         return response()->json(
             [
                 'success'=>true,
-                'data'=> $MatchResult,
+                'data'=> $dataArray,
                 'message'=>'Loss List Get successfully'
             ], 200);
+
+        // $MatchResult = MatchResult::where('status',0)->where('loss_user_id',$this->userId)->get();
+        // foreach($MatchResult as $match)
+        // {
+        //     $other_user_id = $match->win_user_id;
+        //     $user = User::where('id',$other_user_id)->first();
+        //     if($user->image != "")
+        //     {
+        //         $user->image = url('images').'/'.$user->image;
+        //     }
+        //     $match->user = $user;
+        // }
+        // return response()->json(
+        //     [
+        //         'success'=>true,
+        //         'data'=> $MatchResult,
+        //         'message'=>'Loss List Get successfully'
+        //     ], 200);
     }
 
     public function matchDetail(Request $request)

@@ -159,25 +159,42 @@ class UserController extends Controller
     public function noContentList(Request $request)
     {
         $userId = $request->input('user_id');
-        $MatchResult = MatchResult::where('status',1)->where(function($query) use ($userId)
+        $dataArray = array();
+        $MatchResult = MatchResult::where(function($query) use ($userId)
                                     {
                                         $query->where('win_user_id',$userId)
                                         ->orWhere('loss_user_id',$userId);
                                     })->get();
+
         foreach($MatchResult as $match)
         {
-            $other_user_id = $match->win_user_id;
-            $user = User::where('id',$other_user_id)->first();
-            if($user->image != "")
+            if($match->win_user_id == $userId && $match->win_user_status == 3)
             {
-                $user->image = url('images').'/'.$user->image;
+                $other_user_id = $match->loss_user_id;
+                $user = User::where('id',$other_user_id)->first();
+                if($user->image != "")
+                {
+                    $user->image = url('images').'/'.$user->image;
+                }
+                $match->user = $user;
+                array_push($dataArray,$match);
+            }else if($match->loss_user_id == $userId && $match->loss_user_status == 3)
+            {
+                $other_user_id = $match->win_user_id;
+                $user = User::where('id',$other_user_id)->first();
+                if($user->image != "")
+                {
+                    $user->image = url('images').'/'.$user->image;
+                }
+                $match->user = $user;
+                array_push($dataArray,$match);
             }
-            $match->user = $user;
         }
+
         return response()->json(
             [
                 'success'=>true,
-                'data'=> $MatchResult,
+                'data'=> $dataArray,
                 'message'=>'No Contest List Get successfully'
             ], 200);
     }
@@ -185,42 +202,84 @@ class UserController extends Controller
     public function winList(Request $request)
     {
         $userId = $request->input('user_id');
-        $MatchResult = MatchResult::where('status',0)->where('win_user_id',$userId)->get();
+        $dataArray = array();
+        $MatchResult = MatchResult::where(function($query) use ($userId)
+                                    {
+                                        $query->where('win_user_id',$userId)
+                                        ->orWhere('loss_user_id',$userId);
+                                    })->get();
+
         foreach($MatchResult as $match)
         {
-            $other_user_id = $match->loss_user_id;
-            $user = User::where('id',$other_user_id)->first();
-            if($user->image != "")
+            if($match->win_user_id == $userId && $match->win_user_status == 1)
             {
-                $user->image = url('images').'/'.$user->image;
+                $other_user_id = $match->loss_user_id;
+                $user = User::where('id',$other_user_id)->first();
+                if($user->image != "")
+                {
+                    $user->image = url('images').'/'.$user->image;
+                }
+                $match->user = $user;
+                array_push($dataArray,$match);
+            }else if($match->loss_user_id == $userId && $match->loss_user_status == 1)
+            {
+                $other_user_id = $match->win_user_id;
+                $user = User::where('id',$other_user_id)->first();
+                if($user->image != "")
+                {
+                    $user->image = url('images').'/'.$user->image;
+                }
+                $match->user = $user;
+                array_push($dataArray,$match);
             }
-            $match->user = $user;
         }
+
         return response()->json(
             [
                 'success'=>true,
-                'data'=> $MatchResult,
+                'data'=> $dataArray,
                 'message'=>'Win List Get successfully'
             ], 200);
     }
     public function lossList(Request $request)
     {
         $userId = $request->input('user_id');
-        $MatchResult = MatchResult::where('status',0)->where('loss_user_id',$userId)->get();
+        $dataArray = array();
+        $MatchResult = MatchResult::where(function($query) use ($userId)
+                                    {
+                                        $query->where('win_user_id',$userId)
+                                        ->orWhere('loss_user_id',$userId);
+                                    })->get();
+
         foreach($MatchResult as $match)
         {
-            $other_user_id = $match->win_user_id;
-            $user = User::where('id',$other_user_id)->first();
-            if($user->image != "")
+            if($match->win_user_id == $userId && $match->win_user_status == 2)
             {
-                $user->image = url('images').'/'.$user->image;
+                $other_user_id = $match->loss_user_id;
+                $user = User::where('id',$other_user_id)->first();
+                if($user->image != "")
+                {
+                    $user->image = url('images').'/'.$user->image;
+                }
+                $match->user = $user;
+                array_push($dataArray,$match);
+            }else if($match->loss_user_id == $userId && $match->loss_user_status == 2)
+            {
+                $other_user_id = $match->win_user_id;
+                $user = User::where('id',$other_user_id)->first();
+                if($user->image != "")
+                {
+                    $user->image = url('images').'/'.$user->image;
+                }
+                $match->user = $user;
+                array_push($dataArray,$match);
             }
-            $match->user = $user;
         }
+
         return response()->json(
             [
                 'success'=>true,
-                'data'=> $MatchResult,
+                'data'=> $dataArray,
                 'message'=>'Loss List Get successfully'
             ], 200);
     }
