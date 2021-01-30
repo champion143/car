@@ -903,15 +903,19 @@ class ProfileController extends Controller
         {
             $other_user_id = $match->loss_user_id;
             $raceDataId = $match->win_user_matchrace_id;
-            $raceDataString = 1;
+            // $raceDataString = 1;
+            $raceDataString = $match->win_user_status;
             $raceDataOtherId = $match->loss_user_matchrace_id;
-            $raceDataOtherString = 2;
+            // $raceDataOtherString = 2;
+            $raceDataOtherString = $match->loss_user_status;
         }else{
             $other_user_id = $match->win_user_id;
             $raceDataId = $match->loss_user_matchrace_id;
-            $raceDataString = 2;
+            // $raceDataString = 2;
+            $raceDataString = $match->loss_user_status;
             $raceDataOtherId = $match->win_user_matchrace_id;
-            $raceDataOtherString = 1;
+            // $raceDataOtherString = 1;
+            $raceDataOtherString = $match->win_user_status;
         }
         $user = User::where('id',$other_user_id)->first();
         if($user->image != "")
