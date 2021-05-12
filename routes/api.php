@@ -16,16 +16,6 @@ Route::post('login', [App\Http\Controllers\API\UserController::class, 'login']);
 Route::post('register', [App\Http\Controllers\API\UserController::class, 'register']);
 Route::post('forgot-password', [App\Http\Controllers\API\UserController::class, 'forgot_password']);
 
-/* other user route */
-Route::post('otherUserGetProfile', [App\Http\Controllers\API\CommonUserController::class, 'otherUserGetProfile']);
-Route::post('otherUserFollowingList', [App\Http\Controllers\API\CommonUserController::class, 'otherUserFollowingList']);
-Route::post('otherUserFollowerList', [App\Http\Controllers\API\CommonUserController::class, 'otherUserFollowerList']);
-Route::post('otherUserCarList', [App\Http\Controllers\API\UserController::class, 'otherUserCarList']);
-
-Route::post('otherUsernoContentList', [App\Http\Controllers\API\UserController::class, 'noContentList']);
-Route::post('otherUserwinList', [App\Http\Controllers\API\UserController::class, 'winList']);
-Route::post('otherUserlossList', [App\Http\Controllers\API\UserController::class, 'lossList']);
-Route::post('otherUsermatchDetail', [App\Http\Controllers\API\UserController::class, 'matchDetail']);
 /* end */
 
 Route::post('test', [App\Http\Controllers\API\UserController::class, 'test']);
@@ -33,40 +23,38 @@ Route::post('test', [App\Http\Controllers\API\UserController::class, 'test']);
 Route::middleware(['ApiUserCheck'])->group(function () {
     Route::post('profile',[App\Http\Controllers\API\ProfileController::class, 'index']);
     Route::post('profile/update',[App\Http\Controllers\API\ProfileController::class, 'update']);
-    Route::get('car/list',[App\Http\Controllers\API\ProfileController::class, 'carList']);
-    Route::post('storeCar',[App\Http\Controllers\API\ProfileController::class, 'storeCar']);
-    Route::post('updateCar',[App\Http\Controllers\API\ProfileController::class, 'updateCar']);
-    Route::post('getCarDetail/{id}',[App\Http\Controllers\API\ProfileController::class, 'getCarDetail']);
-    Route::post('deleteCar/{id}',[App\Http\Controllers\API\ProfileController::class, 'deleteCar']);
-    Route::post('user/followandunfollow',[App\Http\Controllers\API\ProfileController::class, 'followStatusChange']);
-    Route::get('user/followerList',[App\Http\Controllers\API\ProfileController::class, 'followerList']);
-    Route::get('user/followingList',[App\Http\Controllers\API\ProfileController::class, 'followingList']);
+    
+    Route::post('profile/updateDriverStatus',[App\Http\Controllers\API\ProfileController::class, 'updateDriverStatus']);
+    
+    Route::get('profile/getNearByDrivers',[App\Http\Controllers\API\ProfileController::class, 'getNearByDrivers']);
+    
+    Route::post('profile/updateLatLng',[App\Http\Controllers\API\ProfileController::class, 'updateLatLng']);
 
-    Route::get('user/notificaionList',[App\Http\Controllers\API\ProfileController::class, 'notificaionList']);
-    Route::post('user/changeNotificationStatus',[App\Http\Controllers\API\ProfileController::class, 'changeNotificationStatus']);
-    Route::post('user/raceChallenger',[App\Http\Controllers\API\ProfileController::class, 'raceChallenger']);
+    Route::post('profile/uploadItem',[App\Http\Controllers\API\ProfileController::class, 'uploadItem']);
+    
+    Route::post('profile/updateNewAddedStatus',[App\Http\Controllers\API\ProfileController::class, 'updateNewAddedStatus']);
+    
+    Route::get('profile/getUploadItem',[App\Http\Controllers\API\ProfileController::class, 'getUploadItem']);
+    Route::post('profile/updateItemTag',[App\Http\Controllers\API\ProfileController::class, 'updateItemTag']);
 
-    Route::get('user/getCarMake',[App\Http\Controllers\API\ProfileController::class, 'getCarMake']);
-    /* update toke */
-    Route::post('user/updatedeviceToken',[App\Http\Controllers\API\ProfileController::class, 'updateDeviceToken']);
-    Route::post('user/audioFileUpload',[App\Http\Controllers\API\ProfileController::class, 'audioFileUpload']);
+    Route::post('profile/doEnquiry',[App\Http\Controllers\API\ProfileController::class, 'doEnquiry']);
 
-    /* win and loss api */
-    Route::get('user/winList',[App\Http\Controllers\API\ProfileController::class, 'winList']);
-    Route::get('user/lossList',[App\Http\Controllers\API\ProfileController::class, 'lossList']);
-    Route::post('user/matchDetail',[App\Http\Controllers\API\ProfileController::class, 'matchDetail']);
+    Route::post('profile/getEnquiry',[App\Http\Controllers\API\ProfileController::class, 'getEnquiry']);
 
-    /* start race api */
-    Route::post('user/startRace',[App\Http\Controllers\API\ProfileController::class, 'startRace']);
+    Route::post('profile/updateEnquiryStatus',[App\Http\Controllers\API\ProfileController::class, 'updateEnquiryStatus']);
+    
+    Route::post('profile/updateEnquiryAcceptOrRejectStatus',[App\Http\Controllers\API\ProfileController::class, 'updateEnquiryAcceptOrRejectStatus']);
+    
+    Route::post('profile/getEnquiryDetail',[App\Http\Controllers\API\ProfileController::class, 'getEnquiryDetail']);
 
-    /* nocontest list */
-    Route::get('user/noContentList',[App\Http\Controllers\API\ProfileController::class, 'noContentList']);
-    Route::post('user/matchStatusChange',[App\Http\Controllers\API\ProfileController::class, 'matchStatusChange']);
+    Route::post('profile/updateEnquiryDeliveryStatus',[App\Http\Controllers\API\ProfileController::class, 'updateEnquiryDeliveryStatus']);
+    
+    Route::post('profile/addDriver',[App\Http\Controllers\API\ProfileController::class, 'addDriver']);
+    
+    Route::post('profile/driverSelection',[App\Http\Controllers\API\ProfileController::class, 'driverSelection']);
+
+    Route::get('profile/getOtherUploadItem',[App\Http\Controllers\API\ProfileController::class, 'getOtherUploadItem']);
+
+    Route::get('profile/getOrderListing',[App\Http\Controllers\API\ProfileController::class, 'getOrderListing']);
 
 });
-Route::post('user/searchUserUsingRacerName',[App\Http\Controllers\API\CommonUserController::class, 'searchUserUsingRacerName']);
-Route::post('user/searchUserUsingUserName',[App\Http\Controllers\API\CommonUserController::class, 'searchUserUsingUserName']);
-
-// Route::middleware('auth:api')->get('/user', function (Request $request) {
-//     return $request->user();
-// });

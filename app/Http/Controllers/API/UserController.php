@@ -18,7 +18,6 @@ use stdClass;
 
 class UserController extends Controller
 {
-    //
     public function login(Request $request){
         $x = new \stdClass();
         if(Auth::attempt(['email' => request('email'), 'password' => request('password')])){
@@ -33,7 +32,7 @@ class UserController extends Controller
             return response()->json(['success' => true,'data'=>$user,'message'=>'Login Successfully'], 200);
         }
         else{
-            return response()->json(['success'=>false,'data'=>$x,'message'=>'Unauthorised'], 401);
+            return response()->json(['success'=>false,'data'=>$x,'message'=>'Email and password Mismatched..'], 401);
         }
     }
 
@@ -55,6 +54,12 @@ class UserController extends Controller
             }else{
                 $user = new User;
                 $user->email = $request->input('email');
+                
+                $user->lat1 = $request->input('lat1','');
+                $user->lng1 = $request->input('lng1','');
+                $user->lat2 = $request->input('lat2','');
+                $user->lng2 = $request->input('lng2','');
+                
                 $user->password = Hash::make($request->input('password'));
                 $user->api_token = Str::random(60);
                 if($request->has('address'))
@@ -100,241 +105,5 @@ class UserController extends Controller
         return response()->json(["msg" => 'Reset password link sent on your email id.']);
     }
 
-    public function test()
-    {
-        $key = 'AAAAFCC7KjQ:APA91bHm9NC4ONC_fzdn_A0fwbqPArQPb9dzbs8jn2_BNT_fZyLi1wMzH9U3FW5uayZwgq7jMuwDol8H0NxJ5gXrSXEbyxamgtuO8XO4EgCA6dCiOZbUiTFhlgXV9wDsclGATC5tucZ5';
-        /* start push notificaion */
-        $ch = curl_init("https://fcm.googleapis.com/fcm/send");
-        //The device token.
-        $token = "dVFYB80LR0bYpP77lPQioc:APA91bGXszjeBztoY6lN0QC6ZZeVGn_nUuxT-IHj1hish6wa8lQuHBgreTz9IU_9U_mRjCyAEvv1Wr0jl4zHPfgl4RIt-HXN0mMklrQ67B5bUb5squGRtov_mnzN0k7Jx1QTa6dvVZAf"; //token here
-        //Title of the Notification.
-        $title = "Carbon One To One";
-        //Body of the Notification.
-        $body = "Bear island knows no king but the king in the north, whose name is stark.";
-        $x = new stdClass();
-        $x->Nick = "Mario";
-        $x->Room = "PortugalVSDenmark";
-        //Creating the notification array.
-        $notification = array('title' =>$title , 'text' => $body, 'body' => 'Hello Body','extra_data'=>$x,"content_available" => true);
-
-        //This array contains, the token and the notification. The 'to' attribute stores the token.
-        $arrayToSend = array('to' => $token, 'notification' => $notification,'data'=>$x,'priority'=>'high');
-        //Generating JSON encoded string form the above array.
-        $json = json_encode($arrayToSend);
-        //Setup headers:
-        $headers = array();
-        $headers[] = 'Content-Type: application/json';
-        $headers[] = 'Authorization: key= AAAAFCC7KjQ:APA91bHm9NC4ONC_fzdn_A0fwbqPArQPb9dzbs8jn2_BNT_fZyLi1wMzH9U3FW5uayZwgq7jMuwDol8H0NxJ5gXrSXEbyxamgtuO8XO4EgCA6dCiOZbUiTFhlgXV9wDsclGATC5tucZ5'; // key here
-        //Setup curl, add headers and post parameters.
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $json);
-        curl_setopt($ch, CURLOPT_HTTPHEADER,$headers);
-        //Send the request
-        $response = curl_exec($ch);
-        //Close request
-        curl_close($ch);
-        print_r($response);
-
-    }
-
-    // car list
-    public function otherUserCarList(Request $request)
-    {
-        $userId = $request->input('user_id');
-        $carList = Car::where('user_id',$userId)->get();
-        foreach($carList as $car)
-        {
-            if($car->image != "")
-            {
-                $car->image = url('images').'/'.$car->image;
-            }
-        }
-        return response()->json(['success'=>true,'data'=>$carList,'message'=>'Car List Retrieve successfully'], 200);
-    }
-
-    public function noContentList(Request $request)
-    {
-        $userId = $request->input('user_id');
-        $dataArray = array();
-        $MatchResult = MatchResult::where(function($query) use ($userId)
-                                    {
-                                        $query->where('win_user_id',$userId)
-                                        ->orWhere('loss_user_id',$userId);
-                                    })->get();
-
-        foreach($MatchResult as $match)
-        {
-            if($match->win_user_id == $userId && $match->win_user_status == 3)
-            {
-                $other_user_id = $match->loss_user_id;
-                $user = User::where('id',$other_user_id)->first();
-                if($user->image != "")
-                {
-                    $user->image = url('images').'/'.$user->image;
-                }
-                $match->user = $user;
-                array_push($dataArray,$match);
-            }else if($match->loss_user_id == $userId && $match->loss_user_status == 3)
-            {
-                $other_user_id = $match->win_user_id;
-                $user = User::where('id',$other_user_id)->first();
-                if($user->image != "")
-                {
-                    $user->image = url('images').'/'.$user->image;
-                }
-                $match->user = $user;
-                array_push($dataArray,$match);
-            }
-        }
-
-        return response()->json(
-            [
-                'success'=>true,
-                'data'=> $dataArray,
-                'message'=>'No Contest List Get successfully'
-            ], 200);
-    }
-
-    public function winList(Request $request)
-    {
-        $userId = $request->input('user_id');
-        $dataArray = array();
-        $MatchResult = MatchResult::where(function($query) use ($userId)
-                                    {
-                                        $query->where('win_user_id',$userId)
-                                        ->orWhere('loss_user_id',$userId);
-                                    })->get();
-
-        foreach($MatchResult as $match)
-        {
-            if($match->win_user_id == $userId && $match->win_user_status == 1)
-            {
-                $other_user_id = $match->loss_user_id;
-                $user = User::where('id',$other_user_id)->first();
-                if($user->image != "")
-                {
-                    $user->image = url('images').'/'.$user->image;
-                }
-                $match->user = $user;
-                array_push($dataArray,$match);
-            }else if($match->loss_user_id == $userId && $match->loss_user_status == 1)
-            {
-                $other_user_id = $match->win_user_id;
-                $user = User::where('id',$other_user_id)->first();
-                if($user->image != "")
-                {
-                    $user->image = url('images').'/'.$user->image;
-                }
-                $match->user = $user;
-                array_push($dataArray,$match);
-            }
-        }
-
-        return response()->json(
-            [
-                'success'=>true,
-                'data'=> $dataArray,
-                'message'=>'Win List Get successfully'
-            ], 200);
-    }
-    public function lossList(Request $request)
-    {
-        $userId = $request->input('user_id');
-        $dataArray = array();
-        $MatchResult = MatchResult::where(function($query) use ($userId)
-                                    {
-                                        $query->where('win_user_id',$userId)
-                                        ->orWhere('loss_user_id',$userId);
-                                    })->get();
-
-        foreach($MatchResult as $match)
-        {
-            if($match->win_user_id == $userId && $match->win_user_status == 2)
-            {
-                $other_user_id = $match->loss_user_id;
-                $user = User::where('id',$other_user_id)->first();
-                if($user->image != "")
-                {
-                    $user->image = url('images').'/'.$user->image;
-                }
-                $match->user = $user;
-                array_push($dataArray,$match);
-            }else if($match->loss_user_id == $userId && $match->loss_user_status == 2)
-            {
-                $other_user_id = $match->win_user_id;
-                $user = User::where('id',$other_user_id)->first();
-                if($user->image != "")
-                {
-                    $user->image = url('images').'/'.$user->image;
-                }
-                $match->user = $user;
-                array_push($dataArray,$match);
-            }
-        }
-
-        return response()->json(
-            [
-                'success'=>true,
-                'data'=> $dataArray,
-                'message'=>'Loss List Get successfully'
-            ], 200);
-    }
-
-    public function matchDetail(Request $request)
-    {
-        $userId = $request->input('userId');
-        $id = $request->input('id');
-        $match = MatchResult::where('id',$id)->first();
-        $raceDataId = 0;
-        $rematchCount = 0;
-        if($match->win_user_id == $userId)
-        {
-            $other_user_id = $match->loss_user_id;
-            $raceDataId = $match->win_user_matchrace_id;
-            $raceDataString = 1;
-            $raceDataOtherId = $match->loss_user_matchrace_id;
-            $raceDataOtherString = 2;
-        }else{
-            $other_user_id = $match->win_user_id;
-            $raceDataId = $match->loss_user_matchrace_id;
-            $raceDataString = 2;
-            $raceDataOtherId = $match->win_user_matchrace_id;
-            $raceDataOtherString = 1;
-        }
-        $user = User::where('id',$other_user_id)->first();
-        if($user->image != "")
-        {
-            $user->image = url('images').'/'.$user->image;
-        }
-
-        /* rematch count*/
-        $rematchCount = 0;
-        $rematchCount1 = MatchResult::where('win_user_id',$userId)->where('loss_user_id',$other_user_id)->count();
-        $rematchCount2 = MatchResult::where('loss_user_id',$userId)->where('win_user_id',$other_user_id)->count();
-        $rematchCount = $rematchCount1 + $rematchCount2;
-        /* end */
-
-        $MatchRace = MatchRace::where('id',$raceDataId)->first();
-        if($MatchRace->file != "")
-        $MatchRace->file = url('images').'/'.$MatchRace->file;
-        $MatchRace->matchresult = $raceDataString;
-        $MatchRace->rematchcount = $rematchCount;
-        $match->racedata = $MatchRace;
-
-        $MatchRace1 = MatchRace::where('id',$raceDataOtherId)->first();
-        if($MatchRace1->file != "")
-        $MatchRace1->file = url('images').'/'.$MatchRace1->file;
-        $MatchRace1->matchresult = $raceDataOtherString;
-        $MatchRace1->rematchcount = $rematchCount;
-        $match->raceotherdata = $MatchRace1;
-
-        $match->user = $user;
-        return response()->json(
-            [
-                'success'=>true,
-                'data'=> $match,
-                'message'=>'Match Detail Get successfully'
-            ], 200);
-    }
 
 }
